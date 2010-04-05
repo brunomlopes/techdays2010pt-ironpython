@@ -1,0 +1,11 @@
+﻿from Demos.Commands import ICommand
+
+class Eval(ICommand):
+	@property 
+	def Name(self):
+		return "Eval"
+
+	def Execute(self, parameters):
+		return str(eval(parameters))
+
+evalCommand = Eval()

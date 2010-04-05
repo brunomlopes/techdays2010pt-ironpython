@@ -1,0 +1,18 @@
+﻿from Demos.Commands import ICommand
+from System.Diagnostics import Process
+
+class Start(ICommand):
+	@property 
+	def Name(self):
+		return "Start"
+
+	def Execute(self, parameters):
+		values = parameters.split(" ", 1)
+
+		if len(values) > 1: e,args = values
+		else: e,args = [parameters, ""]
+
+		Process.Start(e, args)
+		return ""
+
+startCommand = Start()
