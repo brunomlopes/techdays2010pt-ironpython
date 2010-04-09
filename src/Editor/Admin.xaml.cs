@@ -11,17 +11,32 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Editor.Model;
 
 namespace Editor
 {
     public partial class Admin : Window
     {
+        private readonly StepDirectory _stepDirectory;
         private IEnumerator _toggler;
 
-        public Admin()
+        public Admin(StepDirectory stepDirectory)
         {
+            _stepDirectory = stepDirectory;
             InitializeComponent();
             _toggler = this.Toggler().GetEnumerator();
+
+            LoadItems(_stepDirectory.Steps);
+
+        }
+
+        private void LoadItems(IEnumerable<Step> steps)
+        {
+            StepList.Items.Clear();
+            foreach (var step in steps)
+            {
+                StepList.Items.Add(step.Metadata.Name);
+            }
         }
 
         public void Toggle()

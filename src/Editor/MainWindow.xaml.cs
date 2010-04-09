@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using Editor.Model;
 using ICSharpCode.AvalonEdit.Highlighting;
 using IronPython.Hosting;
 using IronPython.Runtime;
@@ -22,6 +23,7 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using NLog.Win32.Targets;
+using Path = System.IO.Path;
 
 namespace Editor
 {
@@ -35,6 +37,7 @@ namespace Editor
         private Admin _adminWindow;
         private Log _logWindow;
         private Logger _logger;
+        private StepDirectory _stepDirectory;
 
         public MainWindow()
         {
@@ -87,6 +90,42 @@ namespace Editor
 
         #region Plumbing
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            GlobalShortcuts.InitializeShortcuts();
+
+            InitializePythonHighlighting();
+
+            InitializeSteps();
+
+            InitializeToolWindows();
+
+            InitializeLogging();
+
+            InitializePythonEngine();
+        }
+
+        private void InitializeSteps()
+        {
+            _stepDirectory = new StepDirectory(Path.Combine(Path.GetDirectoryName(this.GetType().Assembly.Location), "steps"));
+        }
+
+        private void InitializeToolWindows()
+        {
+            _adminWindow = new Admin(_stepDirectory) {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
+            _adminWindow.Closing += (obj, evt) =>
+                                        {
+                                            evt.Cancel = true;
+                                            _adminWindow.Toggle();
+                                        };
+            _logWindow = new Log() {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
+            _logWindow.Closing += (obj, evt) =>
+                                      {
+                                          evt.Cancel = true;
+                                          _logWindow.Toggle();
+                                      };
+        }
+
         private void InitializePythonHighlighting()
         {
             IHighlightingDefinition customHighlighting;
@@ -100,6 +139,9 @@ namespace Editor
                 }
             }
             HighlightingManager.Instance.RegisterHighlighting("Python", new[] { ".py" }, customHighlighting);
+
+            TextEditor.SyntaxHighlighting = HighlightingManager.Instance.GetDefinitionByExtension(".py");
+
         }
 
         private void InitializeLogging()
@@ -115,7 +157,6 @@ namespace Editor
             _logger = LogManager.GetLogger("Main");
         }
 
-       
 
         private void WriteError(string str)
         {
@@ -136,36 +177,6 @@ namespace Editor
             _logWindow.Left = this.Left - _adminWindow.Width - 1;
             _logWindow.Top = this.Top;
             _logWindow.Toggle();
-        }
-
-        private void Window_SourceInitialized(object sender, EventArgs e)
-        {
-            GlobalShortcuts.InitializeShortcuts();
-
-            InitializePythonHighlighting();
-
-            TextEditor.SyntaxHighlighting = HighlightingManager.Instance.GetDefinitionByExtension(".py");
-            TextEditor.Text = @"print '''this is 
-a string
-with
-several lines'''";
-
-            _adminWindow = new Admin() {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
-            _adminWindow.Closing += (obj, evt) =>
-                                        {
-                                            evt.Cancel = true;
-                                            _adminWindow.Toggle();
-                                        };
-            _logWindow = new Log() {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
-            _logWindow.Closing += (obj, evt) =>
-                                      {
-                                          evt.Cancel = true;
-                                          _logWindow.Toggle();
-                                      };
-
-            InitializeLogging();
-
-            InitializePythonEngine();
         }
 
         #endregion Plumbing

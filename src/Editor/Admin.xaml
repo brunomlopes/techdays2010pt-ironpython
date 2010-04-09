@@ -4,6 +4,8 @@
         Title="Admin" Height="300" Width="300">
     <StackPanel>
         <TextBox Name="Filter"></TextBox>
-        <ListView Name="Steps"  />
+        <ListBox Name="StepList" >
+            
+        </ListBox>
     </StackPanel>
 </Window>
