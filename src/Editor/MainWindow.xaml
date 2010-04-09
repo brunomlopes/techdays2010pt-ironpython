@@ -1,7 +1,12 @@
 ﻿<Window x:Class="Editor.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" SourceInitialized="Window_SourceInitialized"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525" xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit">
+        Title="MainWindow" Height="350" Width="525" xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit" xmlns:Editor="clr-namespace:Editor">
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ToggleAdmin}" Executed="ToggleAdmin_Executed"/>
+        <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ToggleLog}" Executed="ToggleLog_Executed"/>
+    </Window.CommandBindings>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="456*" />
@@ -12,9 +17,8 @@
             <RowDefinition Height="63*" />
         </Grid.RowDefinitions>
         <avalonedit:TextEditor Name="TextEditor" Grid.ColumnSpan="2" />
-        <Button Content="Exec" Grid.Column="1" Grid.Row="1" Name="button1" Click="button1_Click" />
-        <ScrollViewer Grid.Row="1" Name="LogScrollViewer" >
-            <TextBlock Name="LogTextBlock" />
-        </ScrollViewer>
+        <Button Content="Exec" Grid.Column="1" Grid.Row="1" Name="Execute" Click="Execute_Click" />
+        <Editor:LogControl Grid.Row="1" x:Name="LogControl"></Editor:LogControl>
+       
     </Grid>
 </Window>
