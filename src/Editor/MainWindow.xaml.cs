@@ -24,6 +24,7 @@ namespace Editor
         private FileToLog _output;
 
         private StepDirectory _stepDirectory;
+        private CommandCenter _commandCenter;
         private ScriptScope _currentScope;
 
         public MainWindow()
@@ -84,28 +85,38 @@ namespace Editor
         {
             GlobalShortcuts.InitializeShortcuts();
 
+            InitializePythonEngine();
+
             InitializePythonHighlighting();
 
             InitializeSteps();
+            InitializeCommands();
 
             InitializeToolWindows();
 
             InitializeLogging();
 
-            InitializePythonEngine();
 
             _newStepEvaluationGuard = PrimeNewStep();
             _adminWindow.SelectFirst();
         }
 
+        private void InitializeCommands()
+        {
+            var commandsPath = Path.Combine(Path.GetDirectoryName(this.GetType().Assembly.Location), "commands");
+            _commandCenter = new CommandCenter(commandsPath, new CommandServices(this), _engine);
+        }
+
         private void InitializeSteps()
         {
-            _stepDirectory = new StepDirectory(Path.Combine(Path.GetDirectoryName(this.GetType().Assembly.Location), "steps"));
+            var stepsPath = Path.Combine(Path.GetDirectoryName(this.GetType().Assembly.Location), "steps");
+            _stepDirectory = new StepDirectory(stepsPath);
         }
 
         private void InitializeToolWindows()
         {
-            _adminWindow = new Admin(_stepDirectory) {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
+            _adminWindow = new Admin(_stepDirectory, _commandCenter)
+                               {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
             _adminWindow.Closing += (obj, evt) =>
                                         {
                                             evt.Cancel = true;
@@ -118,6 +129,11 @@ namespace Editor
                                                 step.Update(this);
                                                 _newStepEvaluationGuard = PrimeNewStep();
                                             };
+
+            _adminWindow.ExecuteCommandWithParameters += (command, parameters) =>
+                                                             {
+                                                                 _commandCenter.ExecuteFromName(command, parameters);
+                                                             };
 
             _logWindow = new Log() {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
             _logWindow.Closing += (obj, evt) =>

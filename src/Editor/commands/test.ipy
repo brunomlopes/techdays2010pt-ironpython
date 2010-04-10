@@ -1,0 +1,7 @@
+﻿class Echo(ICommand):
+	@property 
+	def Name(self):
+		return "Echo"
+
+	def Execute(self, parameters):
+		print "echoing %s " % parameters

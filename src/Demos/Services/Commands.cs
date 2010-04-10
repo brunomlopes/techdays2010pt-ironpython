@@ -43,7 +43,7 @@ namespace Demos.Services
         private IEnumerable<ICommand> GetPythonCommands()
         {
             var engine = Python.CreateEngine();
-            engine.Runtime.LoadAssembly(this.GetType().Assembly);
+            engine.Runtime.LoadAssembly(GetType().Assembly);
 
             var commands = new List<ICommand>();
 

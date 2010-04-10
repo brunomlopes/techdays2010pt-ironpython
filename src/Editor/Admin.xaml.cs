@@ -18,16 +18,25 @@ namespace Editor
     public partial class Admin : Window
     {
         private readonly StepDirectory _stepDirectory;
+        private readonly CommandCenter _commandCenter;
         private IEnumerator _toggler;
         public event Action<Window, Step> StepChanged;
+        public event Action<string, string> ExecuteCommandWithParameters;
 
         
-        public Admin(StepDirectory stepDirectory)
+        public Admin(StepDirectory stepDirectory, CommandCenter commandCenter)
         {
             _stepDirectory = stepDirectory;
+            _commandCenter = commandCenter;
+
             InitializeComponent();
+            
             _toggler = this.Toggler();
             _stepDirectory.StepsUpdated += (d, e) => this.Dispatcher.Invoke((Action)(() => StepsUpdated(d,e)));
+
+            StepChanged += (d, e) => { };
+            ExecuteCommandWithParameters += (d, e) => { };
+
             LoadItems(_stepDirectory.Steps);
         }
 
@@ -51,7 +60,7 @@ namespace Editor
 
             if(newSelectedStep != null)
             {
-                StepList.SelectedIndex = StepList.Items.IndexOf(newSelectedStep);
+                StepList.SelectedItem = newSelectedStep;
                 StepChanged(this, newSelectedStep);
             }
         }
@@ -72,7 +81,7 @@ namespace Editor
 
         private void StepList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(e.AddedItems.Count == 0)
+            if (e.AddedItems.Count == 0)
                 return;
             StepChanged(this, e.AddedItems.Cast<Step>().First());
         }
@@ -80,6 +89,17 @@ namespace Editor
         private void Filter_KeyUp(object sender, KeyEventArgs e)
         {
             LoadItems(_stepDirectory.Steps);
+        }
+
+        private void Command_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Return) return;
+            var split = Command.Text.Trim().Split(new[] {' '}, 1);
+            var commandName = split.FirstOrDefault();
+            if (commandName == null) return;
+            var parameters = split.Skip(1).FirstOrDefault() ?? string.Empty;
+
+            ExecuteCommandWithParameters(commandName, parameters);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -75,6 +75,9 @@
     <Compile Include="LogControl.xaml.cs">
       <DependentUpon>LogControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Model\CommandCenter.cs" />
+    <Compile Include="Model\CommandServices.cs" />
+    <Compile Include="Model\ICommand.cs" />
     <Compile Include="Model\Step.cs" />
     <Compile Include="Model\StepDirectory.cs" />
     <Compile Include="WindowExtensionMethods.xaml.cs" />
@@ -129,6 +132,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="etc\Python.xshd" />
+    <None Include="commands\test.ipy">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -149,12 +155,17 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <ItemGroup>
-      <SourceFiles Include="steps\*.*" />
+      <StepFiles Include="steps\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(SourceFiles)" DestinationFolder="$(TargetDir)\steps" />
+    <Copy SourceFiles="@(StepFiles)" DestinationFolder="$(TargetDir)\steps" />
+    <ItemGroup>
+      <CommandFiles Include="commands\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CommandFiles)" DestinationFolder="$(TargetDir)\commands" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

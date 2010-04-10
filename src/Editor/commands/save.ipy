@@ -1,0 +1,16 @@
+from System.IO import File
+
+class Save(ICommand):
+    @property
+    def Name(self):
+        return "Save"
+
+    def Execute(self, parameters):
+        new_code = services.MainWindow._MainWindow__TextEditor
+        selected_step = services.MainWindow._MainWindow___adminWindow._Admin__StepList.SelectedItem
+        if selected_step is None: 
+            print "No selected step to save"
+            return
+        File.WriteAllText(selected_step.FilePath, new_code)
+        print "Wrote new %s" % selected_step.FileName
+

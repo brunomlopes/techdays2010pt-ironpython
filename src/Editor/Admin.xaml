@@ -4,7 +4,7 @@
         Title="Admin" Height="300" Width="300">
     <DockPanel>
         <TextBox Name="Filter" KeyUp="Filter_KeyUp" DockPanel.Dock="Top"></TextBox>
-
+        <TextBox Name="Command" KeyUp="Command_KeyUp" DockPanel.Dock="Bottom"></TextBox>
     	<ListBox Name="StepList" SelectionChanged="StepList_SelectionChanged">
     		<ScrollViewer></ScrollViewer>
     	</ListBox>

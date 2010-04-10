@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NLog;
 using Enumerable = System.Linq.Enumerable;
 
 namespace Editor.Model
@@ -11,6 +12,7 @@ namespace Editor.Model
         private readonly string _directory;
         private readonly Dictionary<string, Type> _typesByExtension;
         private IEnumerable<string> _extensions;
+        private Logger _logger;
 
         public IEnumerable<Step> Steps { get; private set; }
         public event Action<StepDirectory, IEnumerable<Step>> StepsUpdated;
@@ -18,6 +20,7 @@ namespace Editor.Model
         public StepDirectory(string directory)
         {
             _directory = directory;
+            _logger = LogManager.GetLogger("steps");
             var stepTypes = this.GetType().Assembly.GetTypes()
                 .Where(t => !t.IsAbstract)
                 .Where(t => t.IsSubclassOf(typeof (Step)))
@@ -76,12 +79,14 @@ namespace Editor.Model
 
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
+            _logger.Debug("Reloading steps");
             LoadSteps();
             StepsUpdated(this, Steps);
         }
 
         private void DirectoryChanged(object sender, FileSystemEventArgs e)
         {
+            _logger.Debug("Reloading steps");
             LoadSteps();
             StepsUpdated(this, Steps);
         }

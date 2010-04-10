@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Windows.Controls;
 using NLog;
 
 namespace Editor
@@ -31,9 +32,11 @@ namespace Editor
 
             protected override void Write(LogEventInfo logEvent)
             {
-                _block.Text += logEvent.Message;
-                _viewer.ScrollToBottom();
-                
+                _block.Dispatcher.Invoke((Action) (() =>
+                                                       {
+                                                           _block.Text += logEvent.Message.TrimEnd()+"\n";
+                                                           _viewer.ScrollToBottom();
+                                                       }));
             }
         }
     }
