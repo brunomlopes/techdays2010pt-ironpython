@@ -13,6 +13,7 @@ namespace Editor.Model
         public string Text { get; private set; }
         public string FilePath { get; private set; }
         public IStepMetadata Metadata { get; private set; }
+        protected abstract string Tab { get; }
 
         public Step(string filePath)
         {
@@ -21,7 +22,14 @@ namespace Editor.Model
             Metadata = new DefaultMetadata(filePath);
         }
 
-        public abstract void Update(MainWindow window);
+        public void Update(MainWindow window)
+        {
+            LoadIntoWindow(window);
+
+            window.Tabs.SelectedItem = window.Tabs.FindName(Tab);
+        }
+
+        protected abstract void LoadIntoWindow(MainWindow window);
 
         public override string ToString()
         {
@@ -36,14 +44,19 @@ namespace Editor.Model
         {
         }
 
-        public override void Update(MainWindow window)
+
+        protected override string Tab
         {
-            window.TextEditor.Text = "Should display photo from " + FilePath;
-            window.Tabs.SelectedItem = window.Tabs.FindName("ImageTab");
+            get { return "ImageTab"; }
+        }
+
+        protected override void LoadIntoWindow(MainWindow window)
+        {
             var bitmapImage = new BitmapImage();
             bitmapImage.BeginInit();
             bitmapImage.UriSource = new Uri(FilePath);
             bitmapImage.EndInit();
+
             window.Image.Source = bitmapImage;
         }
     }
@@ -55,13 +68,17 @@ namespace Editor.Model
         {
         }
 
-        public override void Update(MainWindow window)
+        protected override string Tab
+        {
+            get { return "CodeTab"; }
+        }
+
+        protected override void LoadIntoWindow(MainWindow window)
         {
             Metadata.Update(window, this);
             window.TextEditor.Text = Text;
             window.Interpreter.Text = string.Empty;
             window.LogControl.Clear();
-            window.Tabs.SelectedItem = window.Tabs.FindName("CodeTab");
         }
     }
 

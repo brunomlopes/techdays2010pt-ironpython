@@ -6,8 +6,8 @@
         <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ToggleAdmin}" Executed="ToggleAdmin_Executed"/>
         <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ToggleLog}" Executed="ToggleLog_Executed"/>
     </Window.CommandBindings>
-    <TabControl Name="Tabs" >
-        <TabItem Name="CodeTab">
+    <TabControl Name="Tabs"  >
+        <TabItem Name="CodeTab" Height="0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="456*" />
@@ -24,7 +24,7 @@
                 <Editor:LogControl Grid.Row="2" x:Name="LogControl"></Editor:LogControl>
             </Grid>
         </TabItem>
-        <TabItem Name="ImageTab">
+        <TabItem Name="ImageTab" Height="0">
             <Image Name="Image"></Image>
         </TabItem>
     </TabControl>
