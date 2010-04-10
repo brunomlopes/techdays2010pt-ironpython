@@ -151,7 +151,7 @@ namespace Editor
 
             _adminWindow.StepChanged += (sender, step) =>
                                             {
-                                                step.Metadata.Update(this, step);
+                                                step.Update(this);
                                                 _newStepEvaluationGuard = PrimeNewStep();
                                             };
             _logWindow = new Log() {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
@@ -227,7 +227,7 @@ namespace Editor
                 yield return new object();
             }
         }
-       
+        
         #endregion Plumbing
 
         

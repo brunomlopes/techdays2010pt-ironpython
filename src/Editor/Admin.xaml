@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Admin" Height="300" Width="300">
     <StackPanel>
-        <TextBox Name="Filter"></TextBox>
+        <TextBox Name="Filter" KeyUp="Filter_KeyUp"></TextBox>
         <ListBox Name="StepList" SelectionChanged="StepList_SelectionChanged" >
         </ListBox>
     </StackPanel>

@@ -52,5 +52,10 @@ namespace Editor
                 return;
             StepChanged(this, e.AddedItems.Cast<Step>().First());
         }
+
+        private void Filter_KeyUp(object sender, KeyEventArgs e)
+        {
+            LoadItems(_stepDirectory.Steps.Where(s => s.Metadata.Name.ToLowerInvariant().Contains(Filter.Text.ToLowerInvariant())));
+        }
     }
 }

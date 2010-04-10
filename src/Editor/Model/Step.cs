@@ -1,31 +1,15 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using Editor;
 
 namespace Editor.Model
 {
-    public class StepDirectory
-    {
-        public IEnumerable<Step> Steps { get; private set; }
-
-        public StepDirectory(string directory)
-        {
-            var files = Directory.GetFiles(directory, "step_*.py")
-                .Where(f => !f.StartsWith("step_metadata_"));
-            Steps = files
-                .OrderBy(filePath => filePath)
-                .Select(filePath => new Step(filePath));
-        }
-    }
-
-    public class Step
+    public abstract class Step
     {
         public string Text { get; private set; }
         public string FilePath { get; private set; }
-        public DefaultMetadata Metadata { get; private set; }
+        public IStepMetadata Metadata { get; private set; }
 
         public Step(string filePath)
         {
@@ -34,17 +18,24 @@ namespace Editor.Model
             Metadata = new DefaultMetadata(filePath);
         }
 
+        public abstract void Update(MainWindow window);
+
         public override string ToString()
         {
             return Metadata.Name;
         }
     }
 
-    [Handles(".png")]
+    [Handles(".png", ".jpg")]
     class ImageStep : Step
     {
         public ImageStep(string filePath) : base(filePath)
         {
+        }
+
+        public override void Update(MainWindow window)
+        {
+            window.TextEditor.Text = "Should display photo from " + this.FilePath;
         }
     }
 
@@ -53,6 +44,14 @@ namespace Editor.Model
     {
         public PythonStep(string filePath) : base(filePath)
         {
+        }
+
+        public override void Update(MainWindow window)
+        {
+            Metadata.Update(window, this);
+            window.TextEditor.Text = this.Text;
+            window.Interpreter.Text = string.Empty;
+            window.LogControl.Clear();
         }
     }
 
@@ -73,19 +72,18 @@ namespace Editor.Model
 
         public virtual void Update(MainWindow window, Step step)
         {
-            window.TextEditor.Text = step.Text;
-            window.Interpreter.Text = string.Empty;
-            window.LogControl.Clear();
+            // NO-OP
         }
     }
 
+    
     internal class HandlesAttribute : Attribute
     {
-        public string Extension { get; protected set; }
+        public string[] Extensions { get; protected set; }
 
-        public HandlesAttribute(string extension)
+        public HandlesAttribute(params string[] extensions)
         {
-            Extension = extension;
+            Extensions = extensions;
         }
     }
 }
