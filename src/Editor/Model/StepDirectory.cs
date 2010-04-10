@@ -38,6 +38,31 @@ namespace Editor.Model
 
             LoadSteps();
 
+            InitializeFileWatcher();
+        }
+
+        private void LoadSteps()
+        {
+            var order = new Dictionary<string, int>();
+            var orderingFilePath = Path.Combine(_directory, "ordering");
+            if(File.Exists(orderingFilePath))
+            {
+                order = File.ReadAllLines(orderingFilePath)
+                    .Select((filename, i) => new {Filename = filename, i})
+                    .ToDictionary(t => t.Filename, t => t.i);
+            }
+            Steps = Directory.GetFiles(_directory)
+                .Where(path => _extensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
+                .Select(path => new {Path = path, Extension = Path.GetExtension(path).ToLowerInvariant()})
+                .Select(stepLocation => new {Type = _typesByExtension[stepLocation.Extension], stepLocation.Path})
+                .Select(step => Activator.CreateInstance(step.Type, step.Path))
+                .Cast<Step>()
+                .ToList() // Force the lazy basterd into a eager list :)
+                .OrderBy(s => order.ContainsKey(s.FileName) ? order[s.FileName] : int.MaxValue); 
+        }
+
+        private void InitializeFileWatcher()
+        {
             var watcher = new FileSystemWatcher(_directory);
             watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime |
                                    NotifyFilters.FileName;
@@ -59,17 +84,6 @@ namespace Editor.Model
         {
             LoadSteps();
             StepsUpdated(this, Steps);
-        }
-
-        private void LoadSteps()
-        {
-            Steps = Directory.GetFiles(_directory)
-                .Where(path => _extensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
-                .Select(path => new {Path = path, Extension = Path.GetExtension(path).ToLowerInvariant()})
-                .Select(stepLocation => new {Type = _typesByExtension[stepLocation.Extension], stepLocation.Path})
-                .Select(step => Activator.CreateInstance(step.Type, step.Path))
-                .Cast<Step>()
-                .ToList(); // Force the lazy basterd into a eager list :)
         }
     }
 }

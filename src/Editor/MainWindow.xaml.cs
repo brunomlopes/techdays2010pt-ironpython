@@ -2,28 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml;
 using Editor.Model;
 using ICSharpCode.AvalonEdit.Highlighting;
 using IronPython.Hosting;
-using IronPython.Runtime;
 using Microsoft.Scripting.Hosting;
-using Microsoft.Scripting.Runtime;
 using NLog;
 using NLog.Config;
-using NLog.Targets;
-using NLog.Win32.Targets;
 using Path = System.IO.Path;
 
 namespace Editor
@@ -46,37 +33,12 @@ namespace Editor
 
         private void InitializePythonEngine()
         {
-            _engine = Python.CreateEngine(new Dictionary<string, object>(){{"PrivateBinding", true}});
+            _engine = Python.CreateEngine(new Dictionary<string, object> {{"PrivateBinding", true}});
             
             _output = new FileToLog(_logger);
             _engine.GetSysModule().SetVariable("stdout", _output);
             _engine.GetSysModule().SetVariable("stderr", _output);
-            _engine.Runtime.LoadAssembly(this.GetType().Assembly);
-        }
-
-        private void Execute_Click(object sender, RoutedEventArgs e)
-        {
-            _newStepEvaluationGuard = PrimeNewStep();
-            _newStepEvaluationGuard.MoveNext();
-        }
-
-        private void Interpreter_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key != Key.Return) return;
-            if (e.Key == Key.Escape)
-            {
-                Interpreter.Text = string.Empty;
-                return;
-            }
-
-            _newStepEvaluationGuard.MoveNext();
-
-            _logger.Info(string.Format("> {0}\n", Interpreter.Text));
-            var returnValue = ExecuteCodeInCurrentScope(Interpreter.Text);
-            if(returnValue != null)
-            {
-                _logger.Info(string.Format("{0}\n", returnValue));
-            }
+            _engine.Runtime.LoadAssembly(GetType().Assembly);
         }
 
         private object ExecuteCodeInCurrentScope(string pythonCode)
@@ -205,6 +167,30 @@ namespace Editor
             System.Diagnostics.Debug.Write("error:"+exception);
         }
 
+        private void Execute_Click(object sender, RoutedEventArgs e)
+        {
+            _newStepEvaluationGuard = PrimeNewStep();
+            _newStepEvaluationGuard.MoveNext();
+        }
+
+        private void Interpreter_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Return) return;
+            if (e.Key == Key.Escape)
+            {
+                Interpreter.Text = string.Empty;
+                return;
+            }
+
+            _newStepEvaluationGuard.MoveNext();
+
+            _logger.Info(string.Format("> {0}\n", Interpreter.Text));
+            var returnValue = ExecuteCodeInCurrentScope(Interpreter.Text);
+            if (returnValue != null)
+            {
+                _logger.Info(string.Format("{0}\n", returnValue));
+            }
+        }
 
         private void ToggleAdmin_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -235,9 +221,5 @@ namespace Editor
         
         #endregion Plumbing
 
-        
-
     }
-
-    
 }

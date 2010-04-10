@@ -12,12 +12,14 @@ namespace Editor.Model
     {
         public string Text { get; private set; }
         public string FilePath { get; private set; }
+        public string FileName { get; private set; }
         public IStepMetadata Metadata { get; private set; }
         protected abstract string Tab { get; }
 
         public Step(string filePath)
         {
             FilePath = filePath;
+            FileName = Path.GetFileName(filePath);
             Text = File.ReadAllText(filePath);
             Metadata = new DefaultMetadata(filePath);
         }
