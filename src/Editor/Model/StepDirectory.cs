@@ -13,6 +13,7 @@ namespace Editor.Model
         private readonly Dictionary<string, Type> _typesByExtension;
         private IEnumerable<string> _extensions;
         private Logger _logger;
+        private TimedDirectoryWatcher _watcher;
 
         public IEnumerable<Step> Steps { get; private set; }
         public event Action<StepDirectory, IEnumerable<Step>> StepsUpdated;
@@ -66,29 +67,12 @@ namespace Editor.Model
 
         private void InitializeFileWatcher()
         {
-            var watcher = new FileSystemWatcher(_directory);
-            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime |
-                                   NotifyFilters.FileName;
-
-            watcher.Changed += DirectoryChanged;
-            watcher.Created += DirectoryChanged;
-            watcher.Deleted += DirectoryChanged;
-            watcher.Renamed += OnRenamed;
-            watcher.EnableRaisingEvents = true;
-        }
-
-        private void OnRenamed(object sender, RenamedEventArgs e)
-        {
-            _logger.Debug("Reloading steps");
-            LoadSteps();
-            StepsUpdated(this, Steps);
-        }
-
-        private void DirectoryChanged(object sender, FileSystemEventArgs e)
-        {
-            _logger.Debug("Reloading steps");
-            LoadSteps();
-            StepsUpdated(this, Steps);
+            _watcher = new TimedDirectoryWatcher(_directory, () =>
+                                                                 {
+                                                                     _logger.Debug("Reloading steps");
+                                                                     LoadSteps();
+                                                                     StepsUpdated(this, Steps);
+                                                                 });
         }
     }
 }

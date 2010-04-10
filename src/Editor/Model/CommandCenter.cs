@@ -22,6 +22,7 @@ namespace Editor.Model
         private readonly Dictionary<string, List<ICommand>> _currentCommands;
         private readonly List<ICommand> _cSharpCommands;
         private readonly Logger _logger;
+        private TimedDirectoryWatcher _watcher;
 
         public CommandCenter(string directory, CommandServices commandServices, ScriptEngine pythonEngine)
         {
@@ -102,27 +103,11 @@ namespace Editor.Model
 
         private void InitializeFileWatcher()
         {
-            var watcher = new FileSystemWatcher(_directory);
-            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime |
-                                   NotifyFilters.FileName;
-
-            watcher.Changed += DirectoryChanged;
-            watcher.Created += DirectoryChanged;
-            watcher.Deleted += DirectoryChanged;
-            watcher.Renamed += OnRenamed;
-            watcher.EnableRaisingEvents = true;
-        }
-
-        private void OnRenamed(object sender, RenamedEventArgs e)
-        {
-            _logger.Debug("Reloading python commands");
-            LoadPythonCommands();
-        }
-
-        private void DirectoryChanged(object sender, FileSystemEventArgs e)
-        {
-            _logger.Debug("Reloading python commands");
-            LoadPythonCommands();
+            _watcher = new TimedDirectoryWatcher(_directory, () =>
+                                                                 {
+                                                                     _logger.Debug("Reloading python commands");
+                                                                     LoadPythonCommands();
+                                                                 });
         }
     }
 }
