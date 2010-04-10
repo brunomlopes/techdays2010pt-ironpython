@@ -13,7 +13,12 @@ namespace Editor
             Target = new TextBlockTarget(LogTextBlock, LogTextScroll);
         }
 
-        public class TextBlockTarget : Target
+        public void Clear()
+        {
+            LogTextBlock.Text = string.Empty;
+        }
+
+        private class TextBlockTarget : Target
         {
             private readonly TextBlock _block;
             private readonly ScrollViewer _viewer;

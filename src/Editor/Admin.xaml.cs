@@ -19,12 +19,14 @@ namespace Editor
     {
         private readonly StepDirectory _stepDirectory;
         private IEnumerator _toggler;
+        public event Action<Window, Step> StepChanged;
 
+        
         public Admin(StepDirectory stepDirectory)
         {
             _stepDirectory = stepDirectory;
             InitializeComponent();
-            _toggler = this.Toggler().GetEnumerator();
+            _toggler = this.Toggler();
 
             LoadItems(_stepDirectory.Steps);
 
@@ -35,7 +37,7 @@ namespace Editor
             StepList.Items.Clear();
             foreach (var step in steps)
             {
-                StepList.Items.Add(step.Metadata.Name);
+                StepList.Items.Add(step);
             }
         }
 
@@ -44,6 +46,11 @@ namespace Editor
             _toggler.MoveNext();
         }
 
-        
+        private void StepList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(e.AddedItems.Count == 0)
+                return;
+            StepChanged(this, e.AddedItems.Cast<Step>().First());
+        }
     }
 }

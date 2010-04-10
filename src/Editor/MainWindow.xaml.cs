@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,10 +35,9 @@ namespace Editor
     {
         private ScriptEngine _engine;
         private FileToLog _output;
-        private Admin _adminWindow;
-        private Log _logWindow;
-        private Logger _logger;
+
         private StepDirectory _stepDirectory;
+        private ScriptScope _currentScope;
 
         public MainWindow()
         {
@@ -50,24 +50,46 @@ namespace Editor
             _output = new FileToLog(_logger);
             _engine.GetSysModule().SetVariable("stdout", _output);
             _engine.GetSysModule().SetVariable("stderr", _output);
+            _engine.Runtime.LoadAssembly(this.GetType().Assembly);
         }
 
         private void Execute_Click(object sender, RoutedEventArgs e)
         {
-            _engine.Runtime.LoadAssembly(this.GetType().Assembly);
+            _newStepEvaluationGuard = PrimeNewStep();
+            _newStepEvaluationGuard.MoveNext();
+        }
 
+        private void Interpreter_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Return) return;
+            if (e.Key == Key.Escape)
+            {
+                Interpreter.Text = string.Empty;
+                return;
+            }
+
+            _newStepEvaluationGuard.MoveNext();
+
+            _logger.Info(string.Format("> {0}\n", Interpreter.Text));
+            var returnValue = ExecuteCodeInCurrentScope(Interpreter.Text);
+            if(returnValue != null)
+            {
+                _logger.Info(string.Format("{0}\n", returnValue));
+            }
+        }
+
+        private object ExecuteCodeInCurrentScope(string pythonCode)
+        {
             try
             {
-                ScriptSource script = _engine.CreateScriptSourceFromString(TextEditor.Text);
-                CompiledCode code = script.Compile();
-                ScriptScope scope = _engine.CreateScope();
-
-                code.Execute(scope);
+                var script = _engine.CreateScriptSourceFromString(pythonCode);
+                var code = script.Compile();
+                return code.Execute(_currentScope);
             }
             catch (Exception ex)
             {
-                WriteError(string.Format("Error : {0}", ex));
-
+                WriteError(ex);
+                return null;
             }
         }
 
@@ -90,6 +112,11 @@ namespace Editor
 
         #region Plumbing
 
+        private Admin _adminWindow;
+        private Log _logWindow;
+        private Logger _logger;
+        private IEnumerator _newStepEvaluationGuard;
+
         private void Window_SourceInitialized(object sender, EventArgs e)
         {
             GlobalShortcuts.InitializeShortcuts();
@@ -103,6 +130,8 @@ namespace Editor
             InitializeLogging();
 
             InitializePythonEngine();
+
+            _newStepEvaluationGuard = PrimeNewStep();
         }
 
         private void InitializeSteps()
@@ -116,13 +145,21 @@ namespace Editor
             _adminWindow.Closing += (obj, evt) =>
                                         {
                                             evt.Cancel = true;
-                                            _adminWindow.Toggle();
+                                            if (_logWindow.IsActive)
+                                                _adminWindow.Toggle();
                                         };
+
+            _adminWindow.StepChanged += (sender, step) =>
+                                            {
+                                                step.Metadata.Update(this, step);
+                                                _newStepEvaluationGuard = PrimeNewStep();
+                                            };
             _logWindow = new Log() {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
             _logWindow.Closing += (obj, evt) =>
                                       {
                                           evt.Cancel = true;
-                                          _logWindow.Toggle();
+                                          if(_logWindow.IsActive)
+                                            _logWindow.Toggle();
                                       };
         }
 
@@ -158,10 +195,11 @@ namespace Editor
         }
 
 
-        private void WriteError(string str)
+        private void WriteError(Exception exception)
         {
-            _logger.Error(str);
-            System.Diagnostics.Debug.Write("error:"+str);
+            _logger.Error(string.Format("Error:{0}\n", exception.Message));
+            _logger.Debug(string.Format("{0}\n", exception.StackTrace));
+            System.Diagnostics.Debug.Write("error:"+exception);
         }
 
 
@@ -179,7 +217,20 @@ namespace Editor
             _logWindow.Toggle();
         }
 
+        private IEnumerator PrimeNewStep()
+        {
+            _currentScope = _engine.CreateScope();
+
+            ExecuteCodeInCurrentScope(TextEditor.Text);
+            while (true)
+            {
+                yield return new object();
+            }
+        }
+       
         #endregion Plumbing
+
+        
 
     }
 

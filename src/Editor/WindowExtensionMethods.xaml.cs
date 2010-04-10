@@ -5,7 +5,7 @@ namespace Editor
 {
     public static class WindowExtensionMethods
     {
-        public static IEnumerable Toggler(this Window window)
+        public static IEnumerator Toggler(this Window window)
         {
             while (true)
             {

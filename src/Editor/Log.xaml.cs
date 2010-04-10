@@ -30,7 +30,7 @@ namespace Editor
         public Log()
         {
             InitializeComponent();
-            _toggler = this.Toggler().GetEnumerator();
+            _toggler = this.Toggler();
         }
 
         public void Toggle()
