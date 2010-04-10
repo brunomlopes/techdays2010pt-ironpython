@@ -29,7 +29,13 @@ namespace Editor
             _toggler = this.Toggler();
             _stepDirectory.StepsUpdated += (d, e) => this.Dispatcher.Invoke((Action)(() => StepsUpdated(d,e)));
             LoadItems(_stepDirectory.Steps);
-            
+        }
+
+        public void SelectFirst()
+        {
+            var step = _stepDirectory.Steps.First();
+            StepList.SelectedItem = step;
+            StepChanged(this, step);
         }
 
         private void StepsUpdated(StepDirectory stepDirectory, IEnumerable<Step> steps)

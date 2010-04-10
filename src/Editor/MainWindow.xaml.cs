@@ -46,7 +46,8 @@ namespace Editor
 
         private void InitializePythonEngine()
         {
-            _engine = Python.CreateEngine();
+            _engine = Python.CreateEngine(new Dictionary<string, object>(){{"PrivateBinding", true}});
+            
             _output = new FileToLog(_logger);
             _engine.GetSysModule().SetVariable("stdout", _output);
             _engine.GetSysModule().SetVariable("stderr", _output);
@@ -132,6 +133,7 @@ namespace Editor
             InitializePythonEngine();
 
             _newStepEvaluationGuard = PrimeNewStep();
+            _adminWindow.SelectFirst();
         }
 
         private void InitializeSteps()
@@ -154,6 +156,7 @@ namespace Editor
                                                 step.Update(this);
                                                 _newStepEvaluationGuard = PrimeNewStep();
                                             };
+
             _logWindow = new Log() {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
             _logWindow.Closing += (obj, evt) =>
                                       {
@@ -220,6 +223,8 @@ namespace Editor
         private IEnumerator PrimeNewStep()
         {
             _currentScope = _engine.CreateScope();
+            // add a reference to this window to poke around in the internals
+            _currentScope.SetVariable("this", this);
 
             ExecuteCodeInCurrentScope(TextEditor.Text);
             while (true)
