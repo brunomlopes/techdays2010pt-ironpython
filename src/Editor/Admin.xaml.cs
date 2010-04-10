@@ -27,15 +27,33 @@ namespace Editor
             _stepDirectory = stepDirectory;
             InitializeComponent();
             _toggler = this.Toggler();
-
+            _stepDirectory.StepsUpdated += (d, e) => this.Dispatcher.Invoke((Action)(() => StepsUpdated(d,e)));
             LoadItems(_stepDirectory.Steps);
+            
+        }
 
+        private void StepsUpdated(StepDirectory stepDirectory, IEnumerable<Step> steps)
+        {
+            Step newSelectedStep = null;
+            if(StepList.SelectedItems.Count > 0)
+            {
+                var stepName = StepList.SelectedItems.Cast<Step>().First().Metadata.Name;
+                newSelectedStep = steps.SingleOrDefault(
+                    s => stepName.ToLowerInvariant() == s.Metadata.Name.ToLowerInvariant());
+            }
+            LoadItems(steps);
+
+            if(newSelectedStep != null)
+            {
+                StepList.SelectedIndex = StepList.Items.IndexOf(newSelectedStep);
+                StepChanged(this, newSelectedStep);
+            }
         }
 
         private void LoadItems(IEnumerable<Step> steps)
         {
             StepList.Items.Clear();
-            foreach (var step in steps)
+            foreach (var step in steps.Where(s => s.Metadata.Name.ToLowerInvariant().Contains(Filter.Text.ToLowerInvariant())))
             {
                 StepList.Items.Add(step);
             }
@@ -55,7 +73,7 @@ namespace Editor
 
         private void Filter_KeyUp(object sender, KeyEventArgs e)
         {
-            LoadItems(_stepDirectory.Steps.Where(s => s.Metadata.Name.ToLowerInvariant().Contains(Filter.Text.ToLowerInvariant())));
+            LoadItems(_stepDirectory.Steps);
         }
     }
 }

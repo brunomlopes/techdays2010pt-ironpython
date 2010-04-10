@@ -8,10 +8,16 @@ namespace Editor.Model
 {
     public class StepDirectory
     {
+        private readonly string _directory;
+        private readonly Dictionary<string, Type> _typesByExtension;
+        private IEnumerable<string> _extensions;
+
         public IEnumerable<Step> Steps { get; private set; }
+        public event Action<StepDirectory, IEnumerable<Step>> StepsUpdated;
 
         public StepDirectory(string directory)
         {
+            _directory = directory;
             var stepTypes = this.GetType().Assembly.GetTypes()
                 .Where(t => !t.IsAbstract)
                 .Where(t => t.IsSubclassOf(typeof (Step)))
@@ -22,20 +28,48 @@ namespace Editor.Model
                                  .Cast<HandlesAttribute>()
                                  .SelectMany(h => h.Extensions)
                                  });
-            var extensions = stepTypes.SelectMany(t => t.Extensions);
-            var typesByExtension = extensions.ToDictionary(ext => ext.ToLowerInvariant(),
-                                                           ext => stepTypes.Single(s => s.Extensions.Contains(ext)).Type);
+            _extensions = stepTypes.SelectMany(t => t.Extensions);
+            _typesByExtension = _extensions.ToDictionary(ext => ext.ToLowerInvariant(),
+                                                        ext => stepTypes.Single(s => s.Extensions.Contains(ext)).Type);
 
 
-            var metadataFiles = Directory.GetFiles(directory)
+            var metadataFiles = Directory.GetFiles(_directory)
                 .Where(f => !Path.GetFileName(f).EndsWith("_metadata.py"));
 
-            Steps = Directory.GetFiles(directory)
-                .Where(path => extensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
+            LoadSteps();
+
+            var watcher = new FileSystemWatcher(_directory);
+            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime |
+                                   NotifyFilters.FileName;
+
+            watcher.Changed += DirectoryChanged;
+            watcher.Created += DirectoryChanged;
+            watcher.Deleted += DirectoryChanged;
+            watcher.Renamed += OnRenamed;
+            watcher.EnableRaisingEvents = true;
+        }
+
+        private void OnRenamed(object sender, RenamedEventArgs e)
+        {
+            LoadSteps();
+            StepsUpdated(this, Steps);
+        }
+
+        private void DirectoryChanged(object sender, FileSystemEventArgs e)
+        {
+            LoadSteps();
+            StepsUpdated(this, Steps);
+        }
+
+        private void LoadSteps()
+        {
+            Steps = Directory.GetFiles(_directory)
+                .Where(path => _extensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
                 .Select(path => new {Path = path, Extension = Path.GetExtension(path).ToLowerInvariant()})
-                .Select(stepLocation => new {Type = typesByExtension[stepLocation.Extension], stepLocation.Path})
+                .Select(stepLocation => new {Type = _typesByExtension[stepLocation.Extension], stepLocation.Path})
                 .Select(step => Activator.CreateInstance(step.Type, step.Path))
-                .Cast<Step>();
+                .Cast<Step>()
+                .ToList(); // Force the lazy basterd into a eager list :)
         }
     }
 }
