@@ -1,6 +1,9 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Editor;
 
 namespace Editor.Model
@@ -35,7 +38,13 @@ namespace Editor.Model
 
         public override void Update(MainWindow window)
         {
-            window.TextEditor.Text = "Should display photo from " + this.FilePath;
+            window.TextEditor.Text = "Should display photo from " + FilePath;
+            window.Tabs.SelectedItem = window.Tabs.FindName("ImageTab");
+            var bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.UriSource = new Uri(FilePath);
+            bitmapImage.EndInit();
+            window.Image.Source = bitmapImage;
         }
     }
 
@@ -49,9 +58,10 @@ namespace Editor.Model
         public override void Update(MainWindow window)
         {
             Metadata.Update(window, this);
-            window.TextEditor.Text = this.Text;
+            window.TextEditor.Text = Text;
             window.Interpreter.Text = string.Empty;
             window.LogControl.Clear();
+            window.Tabs.SelectedItem = window.Tabs.FindName("CodeTab");
         }
     }
 

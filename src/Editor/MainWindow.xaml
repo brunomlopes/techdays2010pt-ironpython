@@ -6,20 +6,27 @@
         <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ToggleAdmin}" Executed="ToggleAdmin_Executed"/>
         <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ToggleLog}" Executed="ToggleLog_Executed"/>
     </Window.CommandBindings>
-
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="456*" />
-            <ColumnDefinition Width="47*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="217*" />
-            <RowDefinition Height="31" />
-            <RowDefinition Height="63*" />
-        </Grid.RowDefinitions>
-        <avalonedit:TextEditor Name="TextEditor" Grid.ColumnSpan="2" Grid.Row="0" />
-        <TextBox Name="Interpreter" Grid.ColumnSpan="2" Grid.Row="1" KeyDown="Interpreter_KeyDown"/>
-        <Button Content="Exec" Grid.Column="1" Grid.Row="2" Name="Execute" Click="Execute_Click" />
-        <Editor:LogControl Grid.Row="2" x:Name="LogControl"></Editor:LogControl>
-    </Grid>
+    <TabControl Name="Tabs" >
+        <TabItem Name="CodeTab">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="456*" />
+                    <ColumnDefinition Width="47*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="217*" />
+                    <RowDefinition Height="31" />
+                    <RowDefinition Height="63*" />
+                </Grid.RowDefinitions>
+                <avalonedit:TextEditor Name="TextEditor" Grid.ColumnSpan="2" Grid.Row="0" />
+                <TextBox Name="Interpreter" Grid.ColumnSpan="2" Grid.Row="1" KeyDown="Interpreter_KeyDown"/>
+                <Button Content="Exec" Grid.Column="1" Grid.Row="2" Name="Execute" Click="Execute_Click" />
+                <Editor:LogControl Grid.Row="2" x:Name="LogControl"></Editor:LogControl>
+            </Grid>
+        </TabItem>
+        <TabItem Name="ImageTab">
+            <Image Name="Image"></Image>
+        </TabItem>
+    </TabControl>
+    
 </Window>
