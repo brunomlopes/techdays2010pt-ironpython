@@ -115,7 +115,7 @@ namespace Editor
         private void InitializeToolWindows()
         {
             _adminWindow = new Admin(_stepDirectory, _commandCenter)
-                               {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
+                               {Owner = this};
             _adminWindow.Closing += (obj, evt) =>
                                         {
                                             evt.Cancel = true;
@@ -134,7 +134,7 @@ namespace Editor
                                                                  _commandCenter.ExecuteFromName(command, parameters);
                                                              };
 
-            _logWindow = new Log() {Owner = this, WindowStyle = WindowStyle.ToolWindow, ShowActivated = false};
+            _logWindow = new Log() {Owner = this};
             _logWindow.Closing += (obj, evt) =>
                                       {
                                           evt.Cancel = true;

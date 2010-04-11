@@ -1,6 +1,7 @@
 ﻿<Window x:Class="Editor.Log"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Editor="clr-namespace:Editor" Title="Log" Height="300" Width="300">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Editor="clr-namespace:Editor" Title="Log" Height="300" Width="300"
+        WindowStyle="ToolWindow" ShowActivated="False" ShowInTaskbar="False">
     <Grid>
         <Editor:LogControl x:Name="LogControl"></Editor:LogControl>
     </Grid>
