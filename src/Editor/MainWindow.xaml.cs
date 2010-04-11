@@ -113,7 +113,7 @@ namespace Editor
 
         private void InitializeSteps()
         {
-            _stepDirectory = new StepDirectory(FindPathForDirectory("steps"));
+            _stepDirectory = new StepDirectory(FindPathForDirectory("steps"), _engine);
         }
 
         private void InitializeToolWindows()

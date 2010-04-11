@@ -1,10 +1,7 @@
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows;
 using System.Windows.Media.Imaging;
-using Editor;
 
 namespace Editor.Model
 {
@@ -13,7 +10,7 @@ namespace Editor.Model
         public string Text { get; private set; }
         public string FilePath { get; private set; }
         public string FileName { get; private set; }
-        public IStepMetadata Metadata { get; private set; }
+        public IStepMetadata Metadata { get; set; }
         protected abstract string Tab { get; }
 
         public Step(string filePath)
@@ -21,17 +18,15 @@ namespace Editor.Model
             FilePath = filePath;
             FileName = Path.GetFileName(filePath);
             Text = File.ReadAllText(filePath);
-            Metadata = new DefaultMetadata(filePath);
         }
 
         public void Update(MainWindow window)
         {
-            LoadIntoWindow(window);
+            Metadata.Update(window, this);
 
             window.Tabs.SelectedItem = window.Tabs.FindName(Tab);
         }
 
-        protected abstract void LoadIntoWindow(MainWindow window);
 
         public override string ToString()
         {
@@ -44,22 +39,12 @@ namespace Editor.Model
     {
         public ImageStep(string filePath) : base(filePath)
         {
+            Metadata = new DefaultImageMetadata(filePath);
         }
-
 
         protected override string Tab
         {
             get { return "ImageTab"; }
-        }
-
-        protected override void LoadIntoWindow(MainWindow window)
-        {
-            var bitmapImage = new BitmapImage();
-            bitmapImage.BeginInit();
-            bitmapImage.UriSource = new Uri(FilePath);
-            bitmapImage.EndInit();
-
-            window.Image.Source = bitmapImage;
         }
     }
 
@@ -68,19 +53,12 @@ namespace Editor.Model
     {
         public PythonStep(string filePath) : base(filePath)
         {
+            Metadata = new DefaultPythonMetadata(filePath);
         }
 
         protected override string Tab
         {
             get { return "CodeTab"; }
-        }
-
-        protected override void LoadIntoWindow(MainWindow window)
-        {
-            Metadata.Update(window, this);
-            window.TextEditor.Text = Text;
-            window.Interpreter.Text = string.Empty;
-            window.LogControl.Clear();
         }
     }
 
@@ -90,18 +68,47 @@ namespace Editor.Model
         void Update(MainWindow window, Step step);
     }
 
-    public class DefaultMetadata : IStepMetadata
+    public class DefaultPythonMetadata : IStepMetadata
     {
         public string Name { get; private set; }
 
-        public DefaultMetadata(string stepFilePath)
+        public DefaultPythonMetadata(string stepFilePath)
         {
             Name = Path.GetFileNameWithoutExtension(stepFilePath);
         }
 
         public virtual void Update(MainWindow window, Step step)
         {
-            // NO-OP
+            window.TextEditor.Text = step.Text;
+            window.TextEditor.Visibility = Visibility.Visible;
+
+            window.Interpreter.Text = string.Empty;
+            window.Interpreter.Visibility = Visibility.Visible;
+
+            window.LogControl.Clear();
+            window.LogControl.Visibility = Visibility.Visible;
+
+            window.Execute.Visibility = Visibility.Visible;
+        }
+    }
+    
+    public class DefaultImageMetadata : IStepMetadata
+    {
+        public string Name { get; private set; }
+
+        public DefaultImageMetadata(string stepFilePath)
+        {
+            Name = Path.GetFileNameWithoutExtension(stepFilePath);
+        }
+
+        public virtual void Update(MainWindow window, Step step)
+        {
+            var bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.UriSource = new Uri(step.FilePath);
+            bitmapImage.EndInit();
+
+            window.Image.Source = bitmapImage;
         }
     }
 
