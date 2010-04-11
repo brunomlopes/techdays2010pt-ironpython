@@ -6,11 +6,11 @@ class Save(ICommand):
         return "Save"
 
     def Execute(self, parameters):
-        new_code = services.MainWindow._MainWindow__TextEditor
+        new_code = services.MainWindow._MainWindow__TextEditor.Text
         selected_step = services.MainWindow._MainWindow___adminWindow._Admin__StepList.SelectedItem
+        name = selected_step.FileName
         if selected_step is None: 
             print "No selected step to save"
             return
         File.WriteAllText(selected_step.FilePath, new_code)
-        print "Wrote new %s" % selected_step.FileName
-
+        print "Saved text to %s" % name

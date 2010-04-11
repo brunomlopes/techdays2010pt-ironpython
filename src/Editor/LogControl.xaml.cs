@@ -8,6 +8,11 @@ namespace Editor
     {
         public Target Target { get; private set; }
 
+        public ScrollBarVisibility VerticalScrollBarVisibility
+        {
+            set { LogTextScroll.VerticalScrollBarVisibility = value; }
+        }
+
         public LogControl()
         {
             InitializeComponent();
@@ -34,7 +39,7 @@ namespace Editor
             {
                 _block.Dispatcher.Invoke((Action) (() =>
                                                        {
-                                                           _block.Text += logEvent.Message.TrimEnd()+"\n";
+                                                           _block.Text += logEvent.Message.Trim('\n',' ','\r')+"\n";
                                                            _viewer.ScrollToBottom();
                                                        }));
             }

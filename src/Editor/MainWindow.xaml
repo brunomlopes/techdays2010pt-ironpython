@@ -5,28 +5,41 @@
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ToggleAdmin}" Executed="ToggleAdmin_Executed"/>
         <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ToggleLog}" Executed="ToggleLog_Executed"/>
+        <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ZoomIn}" Executed="ZoomIn_Executed"/>
+        <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ZoomOut}" Executed="ZoomOut_Executed"/>
     </Window.CommandBindings>
+    
     <TabControl Name="Tabs"  >
         <TabItem Name="CodeTab" Height="0">
-            <Grid>
+            <Grid Name="CodeGrid">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="456*" />
                     <ColumnDefinition Width="47*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="217*" />
-                    <RowDefinition Height="31" />
-                    <RowDefinition Height="63*" />
+                    <RowDefinition Height="211*" />
+                    <RowDefinition Height="25" />
+                    <RowDefinition Height="60*" />
                 </Grid.RowDefinitions>
-                <avalonedit:TextEditor Name="TextEditor" Grid.ColumnSpan="2" Grid.Row="0" />
-                <TextBox Name="Interpreter" Grid.ColumnSpan="2" Grid.Row="1" KeyDown="Interpreter_KeyDown"/>
+                <avalonedit:TextEditor Name="TextEditor" Grid.ColumnSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Hidden"  ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                    <avalonedit:TextEditor.Template>
+                        <ControlTemplate>
+                        	<ScrollViewer Focusable="False" Name="PART_ScrollViewer" CanContentScroll="True"
+                                          VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" 
+                                          Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TextArea}" 
+                                          VerticalContentAlignment="Top" HorizontalContentAlignment="Left"
+                                          Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" />
+                        </ControlTemplate>
+                    </avalonedit:TextEditor.Template>
+                </avalonedit:TextEditor>
+                <TextBox Name="Interpreter" KeyDown="Interpreter_KeyDown" Text="This is a sample text" Grid.Row="1" Grid.ColumnSpan="2" />
                 <Button Content="Exec" Grid.Column="1" Grid.Row="2" Name="Execute" Click="Execute_Click" />
-                <Editor:LogControl Grid.Row="2" x:Name="LogControl"></Editor:LogControl>
+                <Editor:LogControl  Grid.Row="2" x:Name="LogControl" VerticalScrollBarVisibility="Hidden"></Editor:LogControl>
             </Grid>
         </TabItem>
         <TabItem Name="ImageTab" Height="0">
             <Image Name="Image"></Image>
         </TabItem>
     </TabControl>
-    
+
 </Window>
