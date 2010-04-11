@@ -103,14 +103,13 @@ namespace Editor
 
         private void InitializeCommands()
         {
-            var commandsPath = Path.Combine(Path.GetDirectoryName(this.GetType().Assembly.Location), "commands");
-            _commandCenter = new CommandCenter(commandsPath, new CommandServices(this), _engine);
+            _commandCenter = new CommandCenter(FindPathForDirectory("commands"), new CommandServices(this), _engine);
         }
+
 
         private void InitializeSteps()
         {
-            var stepsPath = Path.Combine(Path.GetDirectoryName(this.GetType().Assembly.Location), "steps");
-            _stepDirectory = new StepDirectory(stepsPath);
+            _stepDirectory = new StepDirectory(FindPathForDirectory("steps"));
         }
 
         private void InitializeToolWindows()
@@ -233,6 +232,19 @@ namespace Editor
             {
                 yield return new object();
             }
+        }
+
+        private string FindPathForDirectory(string directoryName)
+        {
+            var path = Path.GetDirectoryName(this.GetType().Assembly.Location);
+            while (Path.GetPathRoot(path) != path)
+            {
+                var directoryPath = Path.Combine(path, directoryName);
+                if (Directory.Exists(directoryPath)) return directoryPath;
+
+                path = Directory.GetParent(path).FullName;
+            }
+            throw new ApplicationException(string.Format("Directory {0} not found.", directoryName));
         }
         
         #endregion Plumbing

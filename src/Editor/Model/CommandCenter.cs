@@ -44,28 +44,11 @@ namespace Editor.Model
             InitializeFileWatcher();
         }
 
-        public void ExecuteFromName(string name, string parameters)
-        {
-            var command = AvailableCommands.SingleOrDefault(c => c.Name.ToLowerInvariant() == name.ToLowerInvariant());
-
-            if(command == null) return ;
-
-            try
-            {
-                command.Execute(parameters);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(string.Format("Error executing command '{0}' : '{1}'", command.Name, e.Message));
-                _logger.Debug(e.StackTrace);
-            }
-        }
-
         private void LoadPythonCommands()
         {
             var pythonFiles =
                 Directory
-                    .GetFiles("Commands")
+                    .GetFiles(_directory)
                     .Where(f => f.ToLowerInvariant().EndsWith("ipy"));
 
             foreach (var pythonFile in pythonFiles)
@@ -98,6 +81,23 @@ namespace Editor.Model
                     _logger.Error(string.Format("Error with file {0}: {1}", pythonFile, e.Message));
                     _logger.Debug(e.StackTrace);
                 }
+            }
+        }
+
+        public void ExecuteFromName(string name, string parameters)
+        {
+            var command = AvailableCommands.SingleOrDefault(c => c.Name.ToLowerInvariant() == name.ToLowerInvariant());
+
+            if(command == null) return ;
+
+            try
+            {
+                command.Execute(parameters);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(string.Format("Error executing command '{0}' : '{1}'", command.Name, e.Message));
+                _logger.Debug(e.StackTrace);
             }
         }
 
