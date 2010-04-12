@@ -72,6 +72,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Extensions\ScriptScopeExtensionMethods.cs" />
+    <Compile Include="Extensions\WindowExtensionMethods.cs" />
     <Compile Include="LogControl.xaml.cs">
       <DependentUpon>LogControl.xaml</DependentUpon>
     </Compile>
@@ -81,7 +83,6 @@
     <Compile Include="Model\Step.cs" />
     <Compile Include="Model\StepDirectory.cs" />
     <Compile Include="Model\TimedDirectoryWatcher.cs" />
-    <Compile Include="WindowExtensionMethods.xaml.cs" />
     <Page Include="Admin.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Editor.Extensions;
 using IronPython.Runtime;
 using IronPython.Runtime.Types;
 using Microsoft.Scripting.Hosting;
@@ -38,30 +39,25 @@ namespace Editor.Model
                                  .Cast<HandlesAttribute>()
                                  .SelectMany(h => h.Extensions)
                                  });
+
             _extensions = stepTypes.SelectMany(t => t.Extensions);
             _typesByExtension = _extensions.ToDictionary(ext => ext.ToLowerInvariant(),
                                                         ext => stepTypes.Single(s => s.Extensions.Contains(ext)).Type);
 
-
-           
-
-            LoadSteps();
+            LoadStepsAndMetadata();
 
             InitializeFileWatcher();
         }
 
+        private void LoadStepsAndMetadata()
+        {
+            LoadSteps();
+
+            LoadMetadataForSteps();
+        }
+
         private void LoadSteps()
         {
-            var metadataFiles = Directory.GetFiles(_directory)
-                .Where(f => Path.GetFileName(f).EndsWith("_metadata.py"))
-                .Select(
-                    s => new
-                             {
-                                 StepFileName = Path.GetFileName(s).Replace("_metadata.py", ""),
-                                 MetadataFilePath = s,
-                                 MetadataFileName = Path.GetFileName(s)
-                             });
-
             var order = new Dictionary<string, int>();
             var orderingFilePath = Path.Combine(_directory, "ordering");
             if(File.Exists(orderingFilePath))
@@ -73,12 +69,25 @@ namespace Editor.Model
 
             Steps = Directory.GetFiles(_directory)
                 .Where(path => _extensions.Contains(Path.GetExtension(path).ToLowerInvariant()) && !Path.GetFileName(path).StartsWith("_"))
-                .Select(path => new {Path = path, Extension = Path.GetExtension(path).ToLowerInvariant()})
-                .Select(stepLocation => new {Type = _typesByExtension[stepLocation.Extension], stepLocation.Path})
+                .Select(path => new { Path = path, Extension = Path.GetExtension(path).ToLowerInvariant() })
+                .Select(stepLocation => new { Type = _typesByExtension[stepLocation.Extension], stepLocation.Path })
                 .Select(step => Activator.CreateInstance(step.Type, step.Path))
                 .Cast<Step>()
-                .ToList() // Force the lazy basterd into a eager list :)
-                .OrderBy(s => order.ContainsKey(s.FileName) ? order[s.FileName] : int.MaxValue);
+                .OrderBy(s => order.ContainsKey(s.FileName) ? order[s.FileName] : int.MaxValue)
+                .ToList();
+        }
+
+        private void LoadMetadataForSteps()
+        {
+            var metadataFiles = Directory.GetFiles(_directory)
+                .Where(f => Path.GetFileName(f).EndsWith("_metadata.py"))
+                .Select(
+                    s => new
+                             {
+                                 StepFileName = Path.GetFileName(s).Replace("_metadata.py", ""),
+                                 MetadataFilePath = s,
+                                 MetadataFileName = Path.GetFileName(s)
+                             });
 
             foreach (var metadataFile in metadataFiles)
             {
@@ -100,25 +109,22 @@ namespace Editor.Model
                     
                     code.Execute(scope);
 
-                    var pythonStepMetadataTypes = scope.GetItems()
-                        .Select(kvp => kvp.Value)
-                        .OfType<PythonType>()
-                        .Where(pythonType => typeof(IStepMetadata).IsAssignableFrom(pythonType.__clrtype__()))
-                        .Where(pythonType => !pythonType.__clrtype__().IsAbstract)
+                    var pythonStepMetadataTypes = scope.GetImplementationsOf<IStepMetadata>()
                         .Where(pythonType => pythonType.__clrtype__() != typeof(DefaultPythonMetadata));
 
                     var pythonStepMetadata = pythonStepMetadataTypes
                         .Select(pythonType => Activator.CreateInstance(pythonType.__clrtype__(), pythonType, step.FilePath))
-                        .OfType<IStepMetadata>()
-                        .ToList();
-                    if(pythonStepMetadata.Count == 0)
+                        .Cast<IStepMetadata>();
+
+                    if(pythonStepMetadata.Count() == 0)
                     {
                         _logger.Warn("No IStepMetadata types found in {0}", metadataFile.MetadataFileName);
                         continue;
                     }
-                    if(pythonStepMetadata.Count > 1)
+                    if(pythonStepMetadata.Count() > 1)
                     {
-                        _logger.Warn("Too many ({0}) IStepMetadata types found in {1}", pythonStepMetadata.Count, metadataFile.MetadataFileName);
+                        _logger.Warn("Too many ({0}) IStepMetadata types found in {1}", pythonStepMetadata.Count(),
+                                     metadataFile.MetadataFileName);
                         continue;
                     }
                     step.Metadata = pythonStepMetadata.Single();
@@ -136,7 +142,7 @@ namespace Editor.Model
             _watcher = new TimedDirectoryWatcher(_directory, () =>
                                                                  {
                                                                      _logger.Debug("Reloading steps");
-                                                                     LoadSteps();
+                                                                     LoadStepsAndMetadata();
                                                                      StepsUpdated(this, Steps);
                                                                  });
         }
