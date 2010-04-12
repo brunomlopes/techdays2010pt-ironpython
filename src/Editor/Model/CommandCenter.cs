@@ -71,7 +71,7 @@ namespace Editor.Model
                     var pythonCommandTypes = scope.GetImplementationsOf<ICommand>();
 
                     var pythonCommands = pythonCommandTypes
-                        .Select(pythonType => Activator.CreateInstance(pythonType.__clrtype__(), pythonType))
+                        .Select(pythonType => _pythonEngine.Operations.CreateInstance(pythonType))
                         .OfType<ICommand>()
                         .ToList();
 
@@ -79,8 +79,8 @@ namespace Editor.Model
                 }
                 catch (Exception e)
                 {
-                    _logger.Error(string.Format("Error with file {0}: {1}", pythonFile, e.Message));
-                    _logger.Debug(e.StackTrace);
+                    _logger.Error(string.Format("Error with file {0}: {1}\n", pythonFile, e.Message));
+                    _logger.Debug(e.StackTrace+"\n");
                 }
             }
         }
@@ -97,8 +97,8 @@ namespace Editor.Model
             }
             catch (Exception e)
             {
-                _logger.Error(string.Format("Error executing command '{0}' : '{1}'", command.Name, e.Message));
-                _logger.Debug(e.StackTrace);
+                _logger.Error(string.Format("Error executing command '{0}' : '{1}'\n", command.Name, e.Message));
+                _logger.Debug(e.StackTrace+"\n");
             }
         }
 
@@ -106,7 +106,7 @@ namespace Editor.Model
         {
             _watcher = new TimedDirectoryWatcher(_directory, () =>
                                                                  {
-                                                                     _logger.Debug("Reloading python commands");
+                                                                     _logger.Debug("Reloading python commands\n");
                                                                      LoadPythonCommands();
                                                                  });
         }

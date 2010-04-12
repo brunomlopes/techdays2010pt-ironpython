@@ -95,7 +95,7 @@ namespace Editor
         private void Command_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Return) return;
-            var split = Command.Text.Trim().Split(new[] {' '}, 1);
+            var split = Command.Text.Trim().Split(new[] {' '}, 2);
             var commandName = split.FirstOrDefault();
             if (commandName == null) return;
             var parameters = split.Skip(1).FirstOrDefault() ?? string.Empty;

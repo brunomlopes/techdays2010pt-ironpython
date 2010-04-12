@@ -108,14 +108,14 @@ namespace Editor.Model
                     scope.SetVariable("DefaultPythonMetadata", ClrModule.GetPythonType(typeof(DefaultPythonMetadata)));
                     
                     code.Execute(scope);
-
+                    
                     var pythonStepMetadataTypes = scope.GetImplementationsOf<IStepMetadata>()
                         .Where(pythonType => pythonType.__clrtype__() != typeof(DefaultPythonMetadata));
-
+                    
                     var pythonStepMetadata = pythonStepMetadataTypes
-                        .Select(pythonType => Activator.CreateInstance(pythonType.__clrtype__(), pythonType, step.FilePath))
+                        .Select(pythonType => _pythonEngine.Operations.CreateInstance(pythonType, step.FilePath))
                         .Cast<IStepMetadata>();
-
+                    
                     if(pythonStepMetadata.Count() == 0)
                     {
                         _logger.Warn("No IStepMetadata types found in {0}", metadataFile.MetadataFileName);

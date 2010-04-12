@@ -35,8 +35,6 @@
 				<End>'</End>
 			</Span>
 			
-			<MarkPrevious bold="true" color="MidnightBlue">(</MarkPrevious>
-
 			<KeyWords name="BuiltInStatements" bold="true" color="MidnightBlue">
 				<Key word="assert"/>
 				<Key word="del"/>

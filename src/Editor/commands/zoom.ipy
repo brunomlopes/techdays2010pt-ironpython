@@ -1,0 +1,17 @@
+class Zoom(ICommand):
+    @property
+    def Name(self):
+        return "Zoom"
+
+    def Execute(self, parameters):
+        services.MainWindow.Zoom.UpZoomBy(float(parameters))
+        print "zoomed by " +parameters
+
+class SetZoom(ICommand):
+    @property
+    def Name(self):
+        return "Zoom!"
+
+    def Execute(self, parameters):
+        services.MainWindow.Zoom.SetZoomTo(float(parameters))
+        print "zoomed to " +parameters

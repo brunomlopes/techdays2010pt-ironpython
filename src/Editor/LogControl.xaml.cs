@@ -39,7 +39,7 @@ namespace Editor
             {
                 _block.Dispatcher.Invoke((Action) (() =>
                                                        {
-                                                           _block.Text += logEvent.Message.Trim('\n',' ','\r')+"\n";
+                                                           _block.Text += logEvent.Message;
                                                            _viewer.ScrollToBottom();
                                                        }));
             }

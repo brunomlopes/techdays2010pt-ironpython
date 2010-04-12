@@ -83,6 +83,7 @@
     <Compile Include="Model\Step.cs" />
     <Compile Include="Model\StepDirectory.cs" />
     <Compile Include="Model\TimedDirectoryWatcher.cs" />
+    <Compile Include="Zoom.cs" />
     <Page Include="Admin.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

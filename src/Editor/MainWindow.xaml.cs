@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Xml;
 using Editor.Model;
 using ICSharpCode.AvalonEdit.Highlighting;
@@ -41,6 +41,10 @@ namespace Editor
             _engine.GetSysModule().SetVariable("stdout", _output);
             _engine.GetSysModule().SetVariable("stderr", _output);
             _engine.Runtime.LoadAssembly(GetType().Assembly);
+            foreach (var referencedAssembly in GetType().Assembly.GetReferencedAssemblies())
+            {
+                _engine.Runtime.LoadAssembly(Assembly.Load(referencedAssembly));
+            }
         }
 
         private object ExecuteCodeInCurrentScope(string pythonCode)
@@ -81,7 +85,7 @@ namespace Editor
         private Log _logWindow;
         private Logger _logger;
         private IEnumerator _newStepEvaluationGuard;
-        private Zoom _zoom;
+        public Zoom Zoom;
 
         private void Window_SourceInitialized(object sender, EventArgs e)
         {
@@ -100,7 +104,7 @@ namespace Editor
 
             ConfigureLogging();
 
-            _zoom = new Zoom();
+            Zoom = new Zoom(CodeGrid);
             _newStepEvaluationGuard = PrimeNewStep();
             _adminWindow.SelectFirst();
         }
@@ -175,15 +179,12 @@ namespace Editor
             config.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, LogControl.Target));
 
             LogManager.Configuration = config;
-            
         }
-
 
         private void WriteError(Exception exception)
         {
             _logger.Error(string.Format("Error:{0}\n", exception.Message));
             _logger.Debug(string.Format("{0}\n", exception.StackTrace));
-            System.Diagnostics.Debug.Write("error:"+exception);
         }
 
         private void Execute_Click(object sender, RoutedEventArgs e)
@@ -207,7 +208,7 @@ namespace Editor
             var returnValue = ExecuteCodeInCurrentScope(Interpreter.Text);
             if (returnValue != null)
             {
-                _logger.Info(string.Format("{0}", returnValue));
+                _logger.Info(string.Format("{0}\n", returnValue));
             }
         }
 
@@ -227,35 +228,12 @@ namespace Editor
 
         private void ZoomIn_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-
-            CodeGrid.LayoutTransform = _zoom.ZoomIn();
+            Zoom.ZoomIn();
         }
         
         private void ZoomOut_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            CodeGrid.LayoutTransform = _zoom.ZoomOut();
-
-        }
-        class Zoom
-        {
-            private double _x;
-            private double _y;
-            private const double Factor = 0.2;
-            public Zoom()
-            {
-                _x = _y = 1;
-            }
-
-            public ScaleTransform ZoomIn()
-            {
-                _y = (_x += Factor);
-                return new ScaleTransform(_x,_y);
-            }
-            public ScaleTransform ZoomOut()
-            {
-                _y = (_x -= Factor);
-                return new ScaleTransform(_x,_y);
-            }
+            Zoom.ZoomOut();
         }
 
         private IEnumerator PrimeNewStep()
