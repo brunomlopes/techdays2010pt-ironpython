@@ -66,9 +66,20 @@ namespace Editor.Model
                     .Select((filename, i) => new {Filename = filename, i})
                     .ToDictionary(t => t.Filename, t => t.i);
             }
+            
+            var ignore = new List<string>();
+            var ignoreFilePath = Path.Combine(_directory, "ignore");
+            if (File.Exists(ignoreFilePath))
+            {
+                ignore = File.ReadAllLines(ignoreFilePath)
+                    .Select(filename => filename.Trim())
+                    .ToList();
+            }
 
             Steps = Directory.GetFiles(_directory)
-                .Where(path => _extensions.Contains(Path.GetExtension(path).ToLowerInvariant()) && !Path.GetFileName(path).StartsWith("_"))
+                .Where(path => _extensions.Contains(Path.GetExtension(path).ToLowerInvariant())
+                               && !(Path.GetFileName(path).EndsWith("_metadata.py"))
+                               && !(ignore.Contains(Path.GetFileName(path))))
                 .Select(path => new { Path = path, Extension = Path.GetExtension(path).ToLowerInvariant() })
                 .Select(stepLocation => new { Type = _typesByExtension[stepLocation.Extension], stepLocation.Path })
                 .Select(step => Activator.CreateInstance(step.Type, step.Path))
