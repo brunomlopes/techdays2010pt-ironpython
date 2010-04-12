@@ -7,6 +7,8 @@
         <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ToggleLog}" Executed="ToggleLog_Executed"/>
         <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ZoomIn}" Executed="ZoomIn_Executed"/>
         <CommandBinding Command="{x:Static Editor:GlobalShortcuts.ZoomOut}" Executed="ZoomOut_Executed"/>
+        <CommandBinding Command="{x:Static Editor:GlobalShortcuts.Next}" Executed="Next_Executed"/>
+        <CommandBinding Command="{x:Static Editor:GlobalShortcuts.Previous}" Executed="Previous_Executed"/>
     </Window.CommandBindings>
     
     <TabControl Name="Tabs"  >
@@ -21,7 +23,8 @@
                     <RowDefinition Height="25" />
                     <RowDefinition Height="60*" />
                 </Grid.RowDefinitions>
-                <avalonedit:TextEditor Name="TextEditor" Grid.ColumnSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Hidden"  ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                <avalonedit:TextEditor Name="TextEditor" Grid.ColumnSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Hidden"  ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                        KeyUp="TextEditor_KeyUp">
                     <avalonedit:TextEditor.Template>
                         <ControlTemplate>
                         	<ScrollViewer Focusable="False" Name="PART_ScrollViewer" CanContentScroll="True"

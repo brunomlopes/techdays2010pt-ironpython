@@ -33,7 +33,7 @@ namespace Editor
             InitializeComponent();
             
             _toggler = this.Toggler();
-            _stepDirectory.StepsUpdated += (d, e) => this.Dispatcher.Invoke((Action)(() => StepsUpdated(d,e)));
+            _stepDirectory.StepsUpdated += (d, e) => Dispatcher.Invoke((Action)(() => StepsUpdated(d,e)));
 
             StepChanged += (d, e) => { };
             ExecuteCommandWithParameters += (d, e) => { };
@@ -101,6 +101,17 @@ namespace Editor
             var parameters = split.Skip(1).FirstOrDefault() ?? string.Empty;
 
             ExecuteCommandWithParameters(commandName, parameters);
+        }
+
+        public void NextStep()
+        {
+            if(StepList.SelectedIndex != StepList.Items.Count-1)
+                StepList.SelectedIndex += 1;
+        }
+        public void PreviousStep()
+        {
+            if (StepList.SelectedIndex != 0)
+                StepList.SelectedIndex -= 1;
         }
     }
 }

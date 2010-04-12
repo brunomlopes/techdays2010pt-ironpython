@@ -236,6 +236,16 @@ namespace Editor
             Zoom.ZoomOut();
         }
 
+        private void Next_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            _adminWindow.NextStep();
+        }
+        
+        private void Previous_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            _adminWindow.PreviousStep();
+        }
+
         private IEnumerator PrimeNewStep()
         {
             _currentScope = _engine.CreateScope();
@@ -247,6 +257,12 @@ namespace Editor
             {
                 yield return new object();
             }
+        }
+
+        private void TextEditor_KeyUp(object sender, KeyEventArgs e)
+        {
+            // ensure we exec when we have new text
+            _newStepEvaluationGuard = PrimeNewStep();
         }
 
         private string FindPathForDirectory(string directoryName)

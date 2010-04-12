@@ -4,10 +4,8 @@ using System.IO;
 using System.Linq;
 using Editor.Extensions;
 using IronPython.Runtime;
-using IronPython.Runtime.Types;
 using Microsoft.Scripting.Hosting;
 using NLog;
-using Enumerable = System.Linq.Enumerable;
 
 namespace Editor.Model
 {
