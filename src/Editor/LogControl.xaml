@@ -7,7 +7,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <ScrollViewer Name="LogTextScroll">
-            <TextBlock Name="LogTextBlock" />
+            <TextBlock Name="LogTextBlock" TextWrapping="Wrap"/>
         </ScrollViewer>
     </Grid>
 </UserControl>

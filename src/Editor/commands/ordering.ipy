@@ -1,0 +1,12 @@
+from System.IO import File,Path
+from System import Array
+class DumpOrdering(ICommand):
+    @property
+    def Name(self):
+        return "ordering"
+
+    def Execute(self, parameters):
+        stepNames = [s.FileName for s in services.MainWindow._MainWindow___stepDirectory.Steps]
+        stepDir = services.MainWindow._MainWindow___stepDirectory._StepDirectory___directory
+        File.WriteAllLines(Path.Combine(stepDir, "ordering"), Array[str](stepNames))
+        print "Wrote %d steps" % len(stepNames)

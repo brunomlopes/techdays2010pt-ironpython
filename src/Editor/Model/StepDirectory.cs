@@ -132,10 +132,11 @@ namespace Editor.Model
                     }
                     if(pythonStepMetadata.Count() > 1)
                     {
-                        _logger.Warn("Too many ({0}) IStepMetadata types found in {1}", pythonStepMetadata.Count(),
-                                     metadataFile.MetadataFileName);
+                        _logger.Warn(String.Format("Too many ({0}) IStepMetadata types found in {1}", pythonStepMetadata.Count(),
+                                     metadataFile.MetadataFileName));
                         continue;
                     }
+                    _logger.Debug("Loaded metadata {0} for step {1}", metadataFile.MetadataFileName, step.FileName);
                     step.Metadata = pythonStepMetadata.Single();
                 }
                 catch (Exception e)

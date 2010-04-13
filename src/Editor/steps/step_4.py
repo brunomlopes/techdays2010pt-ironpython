@@ -1,4 +1,4 @@
-﻿class Developer:
+class Developer:
 	def __init__(self):
 		self.subjects = []
 
@@ -18,4 +18,4 @@ class TechDaysAttendee(Developer):
 
 
 Abel = Developer()
-
+Cain = TechDaysAttendee()

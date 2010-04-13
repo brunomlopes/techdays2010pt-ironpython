@@ -15,3 +15,11 @@ class SetZoom(ICommand):
     def Execute(self, parameters):
         services.MainWindow.Zoom.SetZoomTo(float(parameters))
         print "zoomed to " +parameters
+
+class ShowZoom(ICommand):
+    @property
+    def Name(self):
+        return "Zoom?"
+
+    def Execute(self, parameters):
+        print "current zoom is " +str(services.MainWindow.Zoom._Zoom___x)

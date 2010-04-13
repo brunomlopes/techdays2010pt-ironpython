@@ -13,6 +13,7 @@ using Microsoft.Scripting.Hosting;
 using NLog;
 using NLog.Config;
 using Path = System.IO.Path;
+using System.Linq;
 
 namespace Editor
 {
@@ -195,20 +196,21 @@ namespace Editor
 
         private void Interpreter_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key != Key.Return) return;
             if (e.Key == Key.Escape)
             {
                 Interpreter.Text = string.Empty;
                 return;
             }
-
-            _newStepEvaluationGuard.MoveNext();
-
-            _logger.Info(string.Format("> {0}\n", Interpreter.Text));
-            var returnValue = ExecuteCodeInCurrentScope(Interpreter.Text);
-            if (returnValue != null)
+            if (e.Key == Key.Return)
             {
-                _logger.Info(string.Format("{0}\n", returnValue));
+                _newStepEvaluationGuard.MoveNext();
+
+                _logger.Info(string.Format("> {0}\n", Interpreter.Text));
+                var returnValue = ExecuteCodeInCurrentScope(Interpreter.Text);
+                if (returnValue != null)
+                {
+                    _logger.Info(string.Format("{0}\n", returnValue));
+                }
             }
         }
 

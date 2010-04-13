@@ -1,4 +1,4 @@
-from System.IO import File
+from System.IO import File, Path
 
 class Save(ICommand):
     @property
@@ -14,3 +14,28 @@ class Save(ICommand):
             return
         File.WriteAllText(selected_step.FilePath, new_code)
         print "Saved text to %s" % name
+
+class SaveNew(ICommand):
+    @property
+    def Name(self):
+        return "SaveNew"
+
+    def Execute(self, parameters):
+        new_code = services.MainWindow._MainWindow__TextEditor.Text
+        newStepPath = Path.Combine(services.MainWindow._MainWindow___stepDirectory._StepDirectory___directory, parameters)
+        
+        File.WriteAllText(newStepPath, new_code)
+        print "Saved text to %s" % parameters
+
+class Delete(ICommand):
+    @property
+    def Name(self):
+        return "Delete"
+
+    def Execute(self, parameters):
+        if parameters.strip() == "":
+            print "no file specified to delete"
+            return
+        deleteStep = Path.Combine(services.MainWindow._MainWindow___stepDirectory._StepDirectory___directory, parameters)
+        File.Delete(deleteStep)
+        print "Deleted %s" % parameters
