@@ -6,7 +6,19 @@ class DumpOrdering(ICommand):
         return "ordering"
 
     def Execute(self, parameters):
-        stepNames = [s.FileName for s in services.MainWindow._MainWindow___stepDirectory.Steps]
-        stepDir = services.MainWindow._MainWindow___stepDirectory._StepDirectory___directory
+        stepNames = [s.FileName for s in services.StepDirectory.Steps]
+        stepDir = services.StepDirectory.Path
         File.WriteAllLines(Path.Combine(stepDir, "ordering"), Array[str](stepNames))
         print "Wrote %d steps" % len(stepNames)
+
+
+class Ignore(ICommand):
+    @property
+    def Name(self):
+        return "ignore"
+
+    def Execute(self, parameters):
+        stepFileName = services.Admin.CurrentStep.FileName
+        stepPath = services.StepDirectory.Path
+        File.WriteAllLines(Path.Combine(stepDir, "ignore"), Array[str]([stepFileName]))
+        print "Ignored step %s " % stepFileName

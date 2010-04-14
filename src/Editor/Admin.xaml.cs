@@ -29,6 +29,7 @@ namespace Editor
         {
             _stepDirectory = stepDirectory;
             _commandCenter = commandCenter;
+            
 
             InitializeComponent();
             
@@ -46,6 +47,27 @@ namespace Editor
             var step = _stepDirectory.Steps.First();
             StepList.SelectedItem = step;
             StepChanged(this, step);
+        }
+
+        public Step CurrentStep
+        {
+            get { return (Step) StepList.SelectedItem; }
+        }
+
+            public void Toggle()
+        {
+            _toggler.MoveNext();
+        }
+
+        public void NextStep()
+        {
+            if (StepList.SelectedIndex != StepList.Items.Count - 1)
+                StepList.SelectedIndex += 1;
+        }
+        public void PreviousStep()
+        {
+            if (StepList.SelectedIndex != 0)
+                StepList.SelectedIndex -= 1;
         }
 
         private void StepsUpdated(StepDirectory stepDirectory, IEnumerable<Step> steps)
@@ -75,11 +97,6 @@ namespace Editor
             }
         }
 
-        public void Toggle()
-        {
-            _toggler.MoveNext();
-        }
-
         private void StepList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count == 0)
@@ -103,15 +120,6 @@ namespace Editor
             ExecuteCommandWithParameters(commandName, parameters);
         }
 
-        public void NextStep()
-        {
-            if(StepList.SelectedIndex != StepList.Items.Count-1)
-                StepList.SelectedIndex += 1;
-        }
-        public void PreviousStep()
-        {
-            if (StepList.SelectedIndex != 0)
-                StepList.SelectedIndex -= 1;
-        }
+        
     }
 }

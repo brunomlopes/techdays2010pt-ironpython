@@ -1,0 +1,7 @@
+class Step(ICommand):
+    @property
+    def Name(self):
+        return "step?"
+
+    def Execute(self, parameters):
+        print "Current step is " +services.Admin.CurrentStep.FileName

@@ -11,7 +11,7 @@ namespace Editor.Model
 {
     public class StepDirectory
     {
-        private readonly string _directory;
+        private readonly string _path;
         private readonly ScriptEngine _pythonEngine;
         private readonly Dictionary<string, Type> _typesByExtension;
         private IEnumerable<string> _extensions;
@@ -21,9 +21,15 @@ namespace Editor.Model
         public IEnumerable<Step> Steps { get; private set; }
         public event Action<StepDirectory, IEnumerable<Step>> StepsUpdated;
 
-        public StepDirectory(string directory, ScriptEngine pythonEngine)
+        public string Path
         {
-            _directory = directory;
+            get { return _path; }
+        }
+
+
+        public StepDirectory(string path, ScriptEngine pythonEngine)
+        {
+            _path = path;
             _pythonEngine = pythonEngine;
             _logger = LogManager.GetLogger("steps");
 
@@ -57,16 +63,17 @@ namespace Editor.Model
         private void LoadSteps()
         {
             var order = new Dictionary<string, int>();
-            var orderingFilePath = Path.Combine(_directory, "ordering");
+            var orderingFilePath = System.IO.Path.Combine(Path, "ordering");
             if(File.Exists(orderingFilePath))
             {
                 order = File.ReadAllLines(orderingFilePath)
+                    .Where(l => l.Trim() != String.Empty)
                     .Select((filename, i) => new {Filename = filename, i})
                     .ToDictionary(t => t.Filename, t => t.i);
             }
             
             var ignore = new List<string>();
-            var ignoreFilePath = Path.Combine(_directory, "ignore");
+            var ignoreFilePath = System.IO.Path.Combine(Path, "ignore");
             if (File.Exists(ignoreFilePath))
             {
                 ignore = File.ReadAllLines(ignoreFilePath)
@@ -74,11 +81,11 @@ namespace Editor.Model
                     .ToList();
             }
 
-            Steps = Directory.GetFiles(_directory)
-                .Where(path => _extensions.Contains(Path.GetExtension(path).ToLowerInvariant())
-                               && !(Path.GetFileName(path).EndsWith("_metadata.py"))
-                               && !(ignore.Contains(Path.GetFileName(path))))
-                .Select(path => new { Path = path, Extension = Path.GetExtension(path).ToLowerInvariant() })
+            Steps = Directory.GetFiles(Path)
+                .Where(path => _extensions.Contains(System.IO.Path.GetExtension(path).ToLowerInvariant())
+                               && !(System.IO.Path.GetFileName(path).EndsWith("_metadata.py"))
+                               && !(ignore.Contains(System.IO.Path.GetFileName(path))))
+                .Select(path => new { Path = path, Extension = System.IO.Path.GetExtension(path).ToLowerInvariant() })
                 .Select(stepLocation => new { Type = _typesByExtension[stepLocation.Extension], stepLocation.Path })
                 .Select(step => Activator.CreateInstance(step.Type, step.Path))
                 .Cast<Step>()
@@ -88,25 +95,25 @@ namespace Editor.Model
 
         private void LoadMetadataForSteps()
         {
-            var metadataFiles = Directory.GetFiles(_directory)
-                .Where(f => Path.GetFileName(f).EndsWith("_metadata.py"))
+            var metadataFiles = Directory.GetFiles(Path)
+                .Where(f => System.IO.Path.GetFileName(f).EndsWith("_metadata.py"))
                 .Select(
                     s => new
                              {
-                                 StepFileName = Path.GetFileName(s).Replace("_metadata.py", ""),
+                                 StepFileName = System.IO.Path.GetFileName(s).Replace("_metadata.py", ""),
                                  MetadataFilePath = s,
-                                 MetadataFileName = Path.GetFileName(s)
+                                 MetadataFileName = System.IO.Path.GetFileName(s)
                              });
 
             foreach (var metadataFile in metadataFiles)
             {
                 try
                 {
-                    var step = Steps.SingleOrDefault(s => Path.GetFileNameWithoutExtension(s.FileName) == metadataFile.StepFileName);
+                    var step = Steps.SingleOrDefault(s => System.IO.Path.GetFileNameWithoutExtension(s.FileName) == metadataFile.StepFileName);
                     if(step == null)
                     {
-                        _logger.Warn("No step related to metadata {0}",
-                                     metadataFile.MetadataFileName);
+                        _logger.Warn(string.Format("No step related to metadata {0}",
+                                                   metadataFile.MetadataFileName));
                         continue;
                     }
                     ScriptSource script = _pythonEngine.CreateScriptSourceFromFile(metadataFile.MetadataFilePath);
@@ -127,21 +134,21 @@ namespace Editor.Model
                     
                     if(pythonStepMetadata.Count() == 0)
                     {
-                        _logger.Warn("No IStepMetadata types found in {0}", metadataFile.MetadataFileName);
+                        _logger.Warn(string.Format("No IStepMetadata types found in {0}\n", metadataFile.MetadataFileName));
                         continue;
                     }
                     if(pythonStepMetadata.Count() > 1)
                     {
-                        _logger.Warn(String.Format("Too many ({0}) IStepMetadata types found in {1}", pythonStepMetadata.Count(),
+                        _logger.Warn(String.Format("Too many ({0}) IStepMetadata types found in {1}\n", pythonStepMetadata.Count(),
                                      metadataFile.MetadataFileName));
                         continue;
                     }
-                    _logger.Debug("Loaded metadata {0} for step {1}", metadataFile.MetadataFileName, step.FileName);
+                    _logger.Debug(string.Format("Loaded metadata {0} for step {1}\n", metadataFile.MetadataFileName, step.FileName));
                     step.Metadata = pythonStepMetadata.Single();
                 }
                 catch (Exception e)
                 {
-                    _logger.Error("Error fetching IStepMetadata from {0} : {1}", metadataFile.MetadataFileName, e.Message);
+                    _logger.Error(string.Format("Error fetching IStepMetadata from {0} : {1}\n", metadataFile.MetadataFileName, e.Message));
                     _logger.Debug(e.StackTrace);
                 }
             }
@@ -149,9 +156,9 @@ namespace Editor.Model
 
         private void InitializeFileWatcher()
         {
-            _watcher = new TimedDirectoryWatcher(_directory, () =>
+            _watcher = new TimedDirectoryWatcher(Path, () =>
                                                                  {
-                                                                     _logger.Debug("Reloading steps");
+                                                                     _logger.Debug("Reloading steps\n");
                                                                      LoadStepsAndMetadata();
                                                                      StepsUpdated(this, Steps);
                                                                  });

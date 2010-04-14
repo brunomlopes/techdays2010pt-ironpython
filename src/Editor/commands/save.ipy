@@ -7,7 +7,7 @@ class Save(ICommand):
 
     def Execute(self, parameters):
         new_code = services.MainWindow._MainWindow__TextEditor.Text
-        selected_step = services.MainWindow._MainWindow___adminWindow._Admin__StepList.SelectedItem
+        selected_step = services.Admin.CurrentStep
         name = selected_step.FileName
         if selected_step is None: 
             print "No selected step to save"
@@ -22,8 +22,7 @@ class SaveNew(ICommand):
 
     def Execute(self, parameters):
         new_code = services.MainWindow._MainWindow__TextEditor.Text
-        newStepPath = Path.Combine(services.MainWindow._MainWindow___stepDirectory._StepDirectory___directory, parameters)
-        
+        newStepPath = Path.Combine(services.StepDirectory.Path, parameters)
         File.WriteAllText(newStepPath, new_code)
         print "Saved text to %s" % parameters
 
@@ -36,6 +35,6 @@ class Delete(ICommand):
         if parameters.strip() == "":
             print "no file specified to delete"
             return
-        deleteStep = Path.Combine(services.MainWindow._MainWindow___stepDirectory._StepDirectory___directory, parameters)
+        deleteStep = Path.Combine(services.StepDirectory.Path, parameters)
         File.Delete(deleteStep)
         print "Deleted %s" % parameters

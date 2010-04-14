@@ -1,0 +1,1 @@
+print "O texto da janela é '%s'" % this._MainWindow__TextEditor.Text

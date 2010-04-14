@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -87,6 +87,7 @@ namespace Editor
         private Log _logWindow;
         private Logger _logger;
         private IEnumerator _newStepEvaluationGuard;
+        private CommandServices _commandServices;
         public Zoom Zoom{ get; set; }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
@@ -124,7 +125,8 @@ namespace Editor
 
         private void InitializeCommands()
         {
-            _commandCenter = new CommandCenter(FindPathForDirectory("commands"), new CommandServices(this, _stepDirectory), _engine);
+            _commandServices = new CommandServices(this, _stepDirectory);
+            _commandCenter = new CommandCenter(FindPathForDirectory("commands"), _commandServices, _engine);
         }
 
 
@@ -154,6 +156,7 @@ namespace Editor
                                                              {
                                                                  _commandCenter.ExecuteFromName(command, parameters);
                                                              };
+            _commandServices.Admin = _adminWindow;
 
             _logWindow = new Log() {Owner = this};
             _logWindow.Closing += (obj, evt) =>
