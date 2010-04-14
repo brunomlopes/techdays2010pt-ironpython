@@ -86,14 +86,14 @@ namespace Editor
         private Log _logWindow;
         private Logger _logger;
         private IEnumerator _newStepEvaluationGuard;
-        public Zoom Zoom;
+        public Zoom Zoom{ get; set; }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
         {
             _logger = LogManager.GetLogger("Main");
-
-            GlobalShortcuts.InitializeShortcuts();
-
+            
+            InitializeShortcuts();
+            
             InitializePythonEngine();
 
             InitializePythonHighlighting();
@@ -110,9 +110,20 @@ namespace Editor
             _adminWindow.SelectFirst();
         }
 
+        private void InitializeShortcuts()
+        {
+            GlobalShortcuts.InitializeShortcuts();
+            CommandBindings.Add(new CommandBinding(GlobalShortcuts.Next, (o, e) => _adminWindow.NextStep()));
+            CommandBindings.Add(new CommandBinding(GlobalShortcuts.Previous, (o, e) => _adminWindow.PreviousStep()));
+            CommandBindings.Add(new CommandBinding(GlobalShortcuts.ZoomIn, (o, e) => Zoom.ZoomIn()));
+            CommandBindings.Add(new CommandBinding(GlobalShortcuts.ZoomOut, (o, e) => Zoom.ZoomOut()));
+            CommandBindings.Add(new CommandBinding(GlobalShortcuts.Execute, (o, e) => Execute_Click(this, e)));
+            CommandBindings.Add(new CommandBinding(GlobalShortcuts.ToggleBottom, (o, e) => _commandCenter.ExecuteFromName("toggle", string.Empty)));
+        }
+
         private void InitializeCommands()
         {
-            _commandCenter = new CommandCenter(FindPathForDirectory("commands"), new CommandServices(this), _engine);
+            _commandCenter = new CommandCenter(FindPathForDirectory("commands"), new CommandServices(this, _stepDirectory), _engine);
         }
 
 
@@ -226,26 +237,6 @@ namespace Editor
             _logWindow.Left = this.Left - _adminWindow.Width - 1;
             _logWindow.Top = this.Top;
             _logWindow.Toggle();
-        }
-
-        private void ZoomIn_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            Zoom.ZoomIn();
-        }
-        
-        private void ZoomOut_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            Zoom.ZoomOut();
-        }
-
-        private void Next_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            _adminWindow.NextStep();
-        }
-        
-        private void Previous_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            _adminWindow.PreviousStep();
         }
 
         private IEnumerator PrimeNewStep()

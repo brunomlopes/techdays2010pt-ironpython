@@ -36,6 +36,7 @@ namespace Editor.Model
 
             LoadPythonCommands();
             InitializeFileWatcher();
+            _commandServices.CommandCenter = this;
         }
 
         private void LoadCSharpCommands()

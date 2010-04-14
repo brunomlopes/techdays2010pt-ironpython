@@ -1,0 +1,17 @@
+from System.Windows import Visibility
+
+class ToggleBottom(ICommand):
+    @property
+    def Name(self):
+        return "toggle"
+
+    def Execute(self, parameters):
+        window = services.MainWindow
+        if window._MainWindow__Interpreter.Visibility == Visibility.Collapsed:
+            window._MainWindow__Interpreter.Visibility = Visibility.Visible
+            window._MainWindow__Execute.Visibility = Visibility.Visible
+            window._MainWindow__LogControl.Visibility = Visibility.Visible
+        else:
+            window._MainWindow__Interpreter.Visibility = Visibility.Collapsed
+            window._MainWindow__Execute.Visibility = Visibility.Collapsed
+            window._MainWindow__LogControl.Visibility = Visibility.Collapsed
