@@ -1,0 +1,36 @@
+from System.Windows import Visibility, WindowStyle
+
+class ToggleBottom(ICommand):
+    @property
+    def Name(self):
+        return "toggle"
+
+    def Execute(self, parameters):
+        window = services.MainWindow
+        if window._MainWindow__Interpreter.Visibility == Visibility.Collapsed:
+            window._MainWindow__Interpreter.Visibility = Visibility.Visible
+            window._MainWindow__Execute.Visibility = Visibility.Visible
+            window._MainWindow__LogControl.Visibility = Visibility.Visible
+        else:
+            window._MainWindow__Interpreter.Visibility = Visibility.Collapsed
+            window._MainWindow__Execute.Visibility = Visibility.Collapsed
+            window._MainWindow__LogControl.Visibility = Visibility.Collapsed
+
+class Fullscreen(ICommand):
+    @property
+    def Name(self):
+        return "fullscreen"
+
+    def Execute(self, parameters):
+        window = services.MainWindow
+        parameters = parameters.strip()
+        if parameters == "":
+            if window.WindowStyle == WindowStyle.None:
+                window.WindowStyle = WindowStyle.SingleBorderWindow
+            else:
+                window.WindowStyle = WindowStyle.None
+        else:
+            if parameters.lower() == "none":
+                window.WindowStyle = WindowStyle.__getattrib__
+            else:
+                window.WindowStyle = WindowStyle.SingleBorderWindow

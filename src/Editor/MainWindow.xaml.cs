@@ -13,7 +13,6 @@ using Microsoft.Scripting.Hosting;
 using NLog;
 using NLog.Config;
 using Path = System.IO.Path;
-using System.Linq;
 
 namespace Editor
 {
@@ -41,6 +40,8 @@ namespace Editor
             _output = new FileToLog(_logger);
             _engine.GetSysModule().SetVariable("stdout", _output);
             _engine.GetSysModule().SetVariable("stderr", _output);
+            // outra hipotese seria interceptar IO em _engine.Runtime.IO
+
             _engine.Runtime.LoadAssembly(GetType().Assembly);
             foreach (var referencedAssembly in GetType().Assembly.GetReferencedAssemblies())
             {
@@ -209,7 +210,7 @@ namespace Editor
                 var returnValue = ExecuteCodeInCurrentScope(Interpreter.Text);
                 if (returnValue != null)
                 {
-                    _logger.Info(string.Format("{0}\n", returnValue));
+                    _logger.Info(string.Format("{0}\n", _engine.Operations.Format(returnValue)));
                 }
             }
         }

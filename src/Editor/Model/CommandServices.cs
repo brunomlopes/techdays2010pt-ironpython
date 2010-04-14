@@ -8,5 +8,10 @@ namespace Editor.Model
         {
             MainWindow = mainWindow;
         }
+
+        public void Execute(string command, string parameters)
+        {
+            CommandCenter.ExecuteFromName(command, parameters);
+        }
     }
 }
