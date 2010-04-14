@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>text</key>
+		<string>First Slide</string>
+		<key>action</key>
+		<string>[HOME]</string>
+	</dict>
+	<dict>
+		<key>text</key>
+		<string>Last Slide</string>
+		<key>action</key>
+		<string>[END]</string>
+	</dict>
+	<dict>
+		<key>text</key>
+		<string>Go to Slide #</string>
+		<key>action</key>
+		<string>[KEYBOARD:2:1]</string>
+	</dict>
+	<dict>
+		<key>text</key>
+		<string>Pen Mode</string>
+		<key>action</key>
+		<string>[CTRL+p]</string>
+		<key>action_mac</key>
+		<string>[CMD+p]</string>
+	</dict>
+	<dict>
+		<key>text</key>
+		<string>Erase</string>
+		<key>action</key>
+		<string>[e]</string>
+	</dict>
+</array>
+</plist>

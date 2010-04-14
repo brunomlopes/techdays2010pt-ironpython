@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>disable_shake</key>
+	<true/>
+	<key>buttons</key>
+	<array>
+		<dict>
+			<key>action</key>
+			<string>[F1]</string>
+			<key>action_mac</key>
+			<string>[CMD+ENTER]</string>
+			<key>image</key>
+			<string>forward.png</string>
+			<key>text</key>
+			<string>Next</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>[F2]</string>
+			<key>action_mac</key>
+			<string>[CMD+a]</string>
+			<key>image</key>
+			<string>pointer.png</string>
+			<key>text</key>
+			<string>Show</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>[OVERLAY:arrowpad]</string>
+			<key>image</key>
+			<string>arrowpad.png</string>
+			<key>text</key>
+			<string>ArrowPad</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>[CTRL+h]</string>
+			<key>image</key>
+			<string>hide.png</string>
+			<key>text</key>
+			<string>Hide</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>[MACROS]</string>
+			<key>image</key>
+			<string>actions.png</string>
+			<key>text</key>
+			<string>Macros</string>
+		</dict>
+	</array>
+</dict>
+</plist>
