@@ -19,3 +19,4 @@ class TechDaysAttendee(Developer):
 
 Abel = Developer()
 Cain = TechDaysAttendee()
+Cain.learn("ironpython")

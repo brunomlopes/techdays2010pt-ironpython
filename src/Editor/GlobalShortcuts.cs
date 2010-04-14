@@ -12,6 +12,7 @@ namespace Editor
         public static RoutedCommand Next = new RoutedCommand();
         public static RoutedCommand Execute = new RoutedCommand();
         public static RoutedCommand ToggleBottom = new RoutedCommand();
+        public static RoutedCommand ToggleInterpreter = new RoutedCommand();
 
         public static void InitializeShortcuts()
         {
@@ -26,6 +27,8 @@ namespace Editor
             
             Execute.InputGestures.Add(new KeyGesture(Key.F5));
             ToggleBottom.InputGestures.Add(new KeyGesture(Key.F3));
+            ToggleInterpreter.InputGestures.Add(new KeyGesture(Key.F4));
+
         }
     }
 }
