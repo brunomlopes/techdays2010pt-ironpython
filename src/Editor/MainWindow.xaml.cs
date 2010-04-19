@@ -38,6 +38,7 @@ namespace Editor
             _engine = Python.CreateEngine(new Dictionary<string, object> {{"PrivateBinding", true}});
             
             _output = new FileToLog(_logger);
+            // redirecionar o output para a caixa de texto
             _engine.GetSysModule().SetVariable("stdout", _output);
             _engine.GetSysModule().SetVariable("stderr", _output);
             // outra hipotese seria interceptar IO em _engine.Runtime.IO
@@ -81,13 +82,56 @@ namespace Editor
             }
         }
 
+#region Execute Code
+
+        private void Execute_Click(object sender, RoutedEventArgs e)
+        {
+            _newStepEvaluationGuard = PrimeNewStep();
+            _newStepEvaluationGuard.MoveNext();
+        }
+
+        private void Interpreter_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Interpreter.Text = string.Empty;
+                return;
+            }
+            if (e.Key == Key.Return)
+            {
+                _newStepEvaluationGuard.MoveNext();
+
+                _logger.Info(string.Format("> {0}\n", Interpreter.Text));
+                var returnValue = ExecuteCodeInCurrentScope(Interpreter.Text);
+                if (returnValue != null)
+                {
+                    _logger.Info(string.Format("{0}\n", _engine.Operations.Format(returnValue)));
+                }
+            }
+        }
+
+        private IEnumerator PrimeNewStep()
+        {
+            _currentScope = _engine.CreateScope();
+            // add a reference to this window to poke around in the internals
+            _currentScope.SetVariable("this", this);
+
+            ExecuteCodeInCurrentScope(TextEditor.Text);
+            while (true)
+            {
+                yield return new object();
+            }
+        }
+
+#endregion
+
         #region Plumbing
 
         private Admin _adminWindow;
         private Log _logWindow;
         private Logger _logger;
         private IEnumerator _newStepEvaluationGuard;
-        private CommandServices _commandServices;
+        public CommandServices Services { get; set;}
         public Zoom Zoom{ get; set; }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
@@ -125,8 +169,8 @@ namespace Editor
 
         private void InitializeCommands()
         {
-            _commandServices = new CommandServices(this, _stepDirectory);
-            _commandCenter = new CommandCenter(FindPathForDirectory("commands"), _commandServices, _engine);
+            Services = new CommandServices(this, _stepDirectory);
+            _commandCenter = new CommandCenter(FindPathForDirectory("commands"), Services, _engine);
         }
 
 
@@ -156,7 +200,7 @@ namespace Editor
                                                              {
                                                                  _commandCenter.ExecuteFromName(command, parameters);
                                                              };
-            _commandServices.Admin = _adminWindow;
+            Services.Admin = _adminWindow;
 
             _logWindow = new Log() {Owner = this};
             _logWindow.Closing += (obj, evt) =>
@@ -203,32 +247,7 @@ namespace Editor
             _logger.Debug(string.Format("{0}\n", exception.StackTrace));
         }
 
-        private void Execute_Click(object sender, RoutedEventArgs e)
-        {
-            _newStepEvaluationGuard = PrimeNewStep();
-            _newStepEvaluationGuard.MoveNext();
-        }
-
-        private void Interpreter_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-            {
-                Interpreter.Text = string.Empty;
-                return;
-            }
-            if (e.Key == Key.Return)
-            {
-                _newStepEvaluationGuard.MoveNext();
-
-                _logger.Info(string.Format("> {0}\n", Interpreter.Text));
-                var returnValue = ExecuteCodeInCurrentScope(Interpreter.Text);
-                if (returnValue != null)
-                {
-                    _logger.Info(string.Format("{0}\n", _engine.Operations.Format(returnValue)));
-                }
-            }
-        }
-
+        
         private void ToggleAdmin_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             _adminWindow.Left = this.Left + this.Width + 1;
@@ -243,18 +262,7 @@ namespace Editor
             _logWindow.Toggle();
         }
 
-        private IEnumerator PrimeNewStep()
-        {
-            _currentScope = _engine.CreateScope();
-            // add a reference to this window to poke around in the internals
-            _currentScope.SetVariable("this", this);
-
-            ExecuteCodeInCurrentScope(TextEditor.Text);
-            while (true)
-            {
-                yield return new object();
-            }
-        }
+       
 
         private void TextEditor_KeyUp(object sender, KeyEventArgs e)
         {

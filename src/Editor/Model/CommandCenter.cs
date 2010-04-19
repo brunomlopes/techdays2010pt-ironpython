@@ -39,17 +39,6 @@ namespace Editor.Model
             _commandServices.CommandCenter = this;
         }
 
-        private void LoadCSharpCommands()
-        {
-            var commandClasses = GetType().Assembly.GetTypes()
-                .Where(cls => typeof (ICommand).IsAssignableFrom(cls))
-                .Where(cls => !cls.IsInterface && !cls.IsAbstract);
-
-            _cSharpCommands = commandClasses
-                .Select(cls => Activator.CreateInstance(cls) as ICommand)
-                .ToList();
-        }
-
         private void LoadPythonCommands()
         {
             var pythonFiles =
@@ -84,6 +73,16 @@ namespace Editor.Model
                     _logger.Debug(e.StackTrace+"\n");
                 }
             }
+        }
+        private void LoadCSharpCommands()
+        {
+            var commandClasses = GetType().Assembly.GetTypes()
+                .Where(cls => typeof(ICommand).IsAssignableFrom(cls))
+                .Where(cls => !cls.IsInterface && !cls.IsAbstract);
+
+            _cSharpCommands = commandClasses
+                .Select(cls => Activator.CreateInstance(cls) as ICommand)
+                .ToList();
         }
 
         public void ExecuteFromName(string name, string parameters)
